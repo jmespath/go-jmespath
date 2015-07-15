@@ -116,3 +116,37 @@ func capSlice(length int, actual int, step int) int {
 	}
 	return actual
 }
+
+func ToArrayNum(data interface{}) ([]float64, bool) {
+	// Is there a better way to do this with reflect?
+	if d, ok := data.([]interface{}); ok {
+		result := make([]float64, len(d))
+		for i, el := range d {
+			item, ok := el.(float64)
+			if !ok {
+				return nil, false
+			}
+			result[i] = item
+		}
+		return result, true
+	} else {
+		return nil, false
+	}
+}
+
+func ToArrayStr(data interface{}) ([]string, bool) {
+	// Is there a better way to do this with reflect?
+	if d, ok := data.([]interface{}); ok {
+		result := make([]string, len(d))
+		for i, el := range d {
+			item, ok := el.(string)
+			if !ok {
+				return nil, false
+			}
+			result[i] = item
+		}
+		return result, true
+	} else {
+		return nil, false
+	}
+}

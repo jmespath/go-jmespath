@@ -21,6 +21,10 @@ func NewInterpreter() *TreeInterpreter {
 	return &interpreter
 }
 
+type ExpRef struct {
+	ref ASTNode
+}
+
 func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface{}, error) {
 	switch node.nodeType {
 	case ASTComparator:
@@ -57,9 +61,17 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return leftNum <= rightNum, nil
 		}
 	case ASTExpRef:
-		return nil, errors.New("NOT IMPLEMENTED ASTExpRef")
+		return ExpRef{ref: node.children[0]}, nil
 	case ASTFunctionExpression:
-		return nil, errors.New("NOT IMPLEMENTED ASTFunctionExpression")
+		resolvedArgs := make([]interface{}, 0)
+		for _, arg := range node.children {
+			current, err := intr.Execute(arg, value)
+			if err != nil {
+				return nil, err
+			}
+			resolvedArgs = append(resolvedArgs, current)
+		}
+		return CallFunction(node.value.(string), resolvedArgs)
 	case ASTField:
 		if m, ok := value.(map[string]interface{}); ok {
 			key := node.value.(string)

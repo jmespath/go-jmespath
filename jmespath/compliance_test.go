@@ -28,7 +28,7 @@ var whiteListed = []string{
 	"compliance/current.json",
 	"compliance/escape.json",
 	"compliance/filters.json",
-	//"compliance/functions.json",
+	"compliance/functions.json",
 	"compliance/identifiers.json",
 	"compliance/indices.json",
 	"compliance/literal.json",
