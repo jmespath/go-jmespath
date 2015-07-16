@@ -340,7 +340,7 @@
       "error": "invalid-type"
     },
     {
-      "expression": "values(objects)",
+      "expression": "sort(values(objects))",
       "result": ["bar", "baz"]
     },
     {

@@ -105,17 +105,13 @@
         },
         "top2": {
             "sub1": {"foo": "one"}
-        },
-        "top3": {
-            "sub3": {"notfoo": "notfoo"}
         }
     },
     "cases": [
          {
             "expression": "*",
             "result": [{"sub1": {"foo": "one"}},
-                       {"sub1": {"foo": "one"}},
-                       {"sub3": {"notfoo": "notfoo"}}]
+                       {"sub1": {"foo": "one"}}]
          },
          {
             "expression": "*.sub1",
@@ -125,8 +121,7 @@
          {
             "expression": "*.*",
             "result": [[{"foo": "one"}],
-                       [{"foo": "one"}],
-                       [{"notfoo": "notfoo"}]]
+                       [{"foo": "one"}]]
          },
          {
             "expression": "*.*.foo[]",
@@ -422,7 +417,7 @@
 {
     "given": {
         "string": "string",
-        "hash": {"foo": "bar", "bar": "baz"},
+        "hash": {"foo": "val", "bar": "val"},
         "number": 23,
         "array": [1, 2, 3],
         "nullvalue": null
@@ -434,7 +429,7 @@
          },
          {
             "expression": "hash.*",
-            "result": ["bar", "baz"]
+            "result": ["val", "val"]
          },
          {
             "expression": "number.*",
