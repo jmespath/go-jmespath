@@ -38,7 +38,7 @@ var whiteListed = []string{
 	"compliance/slice.json",
 	"compliance/syntax.json",
 	"compliance/unicode.json",
-	//"compliance/wildcard.json",
+	"compliance/wildcard.json",
 }
 
 func allowed(path string) bool {
