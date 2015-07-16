@@ -14,10 +14,12 @@ import (
 // It will produce the result of applying the JMESPath expression associated
 // with the ASTNode to the input data "value".
 type TreeInterpreter struct {
+	functionCaller *FunctionCaller
 }
 
 func NewInterpreter() *TreeInterpreter {
 	interpreter := TreeInterpreter{}
+	interpreter.functionCaller = NewFunctionCaller()
 	return &interpreter
 }
 
@@ -71,7 +73,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return CallFunction(node.value.(string), resolvedArgs)
+		return intr.functionCaller.CallFunction(node.value.(string), resolvedArgs, intr)
 	case ASTField:
 		if m, ok := value.(map[string]interface{}); ok {
 			key := node.value.(string)
