@@ -40,6 +40,84 @@ type argSpec struct {
 	variadic bool
 }
 
+type byExprString struct {
+	intr     *TreeInterpreter
+	node     ASTNode
+	items    []interface{}
+	hasError bool
+}
+
+func (a byExprString) Len() int {
+	return len(a.items)
+}
+func (a byExprString) Swap(i, j int) {
+	a.items[i], a.items[j] = a.items[j], a.items[i]
+}
+func (a byExprString) Less(i, j int) bool {
+	first, err := a.intr.Execute(a.node, a.items[i])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	ith, ok := first.(string)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	second, err := a.intr.Execute(a.node, a.items[j])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	jth, ok := second.(string)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	return ith < jth
+}
+
+type byExprFloat struct {
+	intr     *TreeInterpreter
+	node     ASTNode
+	items    []interface{}
+	hasError bool
+}
+
+func (a byExprFloat) Len() int {
+	return len(a.items)
+}
+func (a byExprFloat) Swap(i, j int) {
+	a.items[i], a.items[j] = a.items[j], a.items[i]
+}
+func (a byExprFloat) Less(i, j int) bool {
+	first, err := a.intr.Execute(a.node, a.items[i])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	ith, ok := first.(float64)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	second, err := a.intr.Execute(a.node, a.items[j])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	jth, ok := second.(float64)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	return ith < jth
+}
+
 type FunctionCaller struct {
 	functionTable map[string]functionEntry
 }
@@ -437,7 +515,8 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		return nil, err
 	}
 	if t, ok := start.(float64); ok {
-		best := t
+		bestVal := t
+		bestItem := arr[0]
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
@@ -447,13 +526,15 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			if !ok {
 				return nil, errors.New("Invalid type, must be number")
 			}
-			if current > best {
-				best = current
+			if current > bestVal {
+				bestVal = current
+				bestItem = item
 			}
 		}
-		return best, nil
+		return bestItem, nil
 	} else if t, ok := start.(string); ok {
-		best := t
+		bestVal := t
+		bestItem := arr[0]
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
@@ -463,11 +544,12 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			if !ok {
 				return nil, errors.New("Invalid type, must be string")
 			}
-			if current < best {
-				best = current
+			if current > bestVal {
+				bestVal = current
+				bestItem = item
 			}
 		}
-		return best, nil
+		return bestItem, nil
 	} else {
 		return nil, errors.New("Invalid type, must be number of string.")
 	}
@@ -516,7 +598,58 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 	}
 }
 func jpfMinBy(arguments []interface{}) (interface{}, error) {
-	return nil, errors.New("Unimplemented min_by")
+	intr := arguments[0].(*TreeInterpreter)
+	arr := arguments[1].([]interface{})
+	exp := arguments[2].(ExpRef)
+	node := exp.ref
+	if len(arr) == 0 {
+		return nil, nil
+	} else if len(arr) == 1 {
+		return arr[0], nil
+	}
+	start, err := intr.Execute(node, arr[0])
+	if err != nil {
+		return nil, err
+	}
+	if t, ok := start.(float64); ok {
+		bestVal := t
+		bestItem := arr[0]
+		for _, item := range arr[1:] {
+			result, err := intr.Execute(node, item)
+			if err != nil {
+				return nil, err
+			}
+			current, ok := result.(float64)
+			if !ok {
+				return nil, errors.New("Invalid type, must be number")
+			}
+			if current < bestVal {
+				bestVal = current
+				bestItem = item
+			}
+		}
+		return bestItem, nil
+	} else if t, ok := start.(string); ok {
+		bestVal := t
+		bestItem := arr[0]
+		for _, item := range arr[1:] {
+			result, err := intr.Execute(node, item)
+			if err != nil {
+				return nil, err
+			}
+			current, ok := result.(string)
+			if !ok {
+				return nil, errors.New("Invalid type, must be string")
+			}
+			if current < bestVal {
+				bestVal = current
+				bestItem = item
+			}
+		}
+		return bestItem, nil
+	} else {
+		return nil, errors.New("Invalid type, must be number of string.")
+	}
 }
 func jpfType(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0]
@@ -577,7 +710,37 @@ func jpfSort(arguments []interface{}) (interface{}, error) {
 	}
 }
 func jpfSortBy(arguments []interface{}) (interface{}, error) {
-	return nil, errors.New("Unimplemented sort_by")
+	intr := arguments[0].(*TreeInterpreter)
+	arr := arguments[1].([]interface{})
+	exp := arguments[2].(ExpRef)
+	node := exp.ref
+	if len(arr) == 0 {
+		return arr, nil
+	} else if len(arr) == 1 {
+		return arr, nil
+	}
+	start, err := intr.Execute(node, arr[0])
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := start.(float64); ok {
+		sortable := byExprFloat{intr, node, arr, false}
+		sort.Stable(sortable)
+		if sortable.hasError {
+			return nil, errors.New("Error in sort_by comparison")
+		}
+		return arr, nil
+	} else if _, ok := start.(string); ok {
+		sortable := byExprString{intr, node, arr, false}
+		sort.Stable(sortable)
+		if sortable.hasError {
+			return nil, errors.New("Error in sort_by comparison")
+		}
+		return arr, nil
+	} else {
+		return nil, errors.New("Invalid type, must be number of string.")
+	}
+	return nil, errors.New("Invalid type, must be number of string.")
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
 	sep := arguments[0].(string)
