@@ -47,13 +47,13 @@ type byExprString struct {
 	hasError bool
 }
 
-func (a byExprString) Len() int {
+func (a *byExprString) Len() int {
 	return len(a.items)
 }
-func (a byExprString) Swap(i, j int) {
+func (a *byExprString) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
 }
-func (a byExprString) Less(i, j int) bool {
+func (a *byExprString) Less(i, j int) bool {
 	first, err := a.intr.Execute(a.node, a.items[i])
 	if err != nil {
 		a.hasError = true
@@ -86,13 +86,13 @@ type byExprFloat struct {
 	hasError bool
 }
 
-func (a byExprFloat) Len() int {
+func (a *byExprFloat) Len() int {
 	return len(a.items)
 }
-func (a byExprFloat) Swap(i, j int) {
+func (a *byExprFloat) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
 }
-func (a byExprFloat) Less(i, j int) bool {
+func (a *byExprFloat) Less(i, j int) bool {
 	first, err := a.intr.Execute(a.node, a.items[i])
 	if err != nil {
 		a.hasError = true
@@ -724,14 +724,14 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 		return nil, err
 	}
 	if _, ok := start.(float64); ok {
-		sortable := byExprFloat{intr, node, arr, false}
+		sortable := &byExprFloat{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("Error in sort_by comparison")
 		}
 		return arr, nil
 	} else if _, ok := start.(string); ok {
-		sortable := byExprString{intr, node, arr, false}
+		sortable := &byExprString{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("Error in sort_by comparison")
