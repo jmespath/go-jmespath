@@ -587,10 +587,8 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 			return items[0], nil
 		}
 		best := items[0]
-		fmt.Printf("Best: %s\n", best)
 		for _, item := range items[1:] {
 			if item < best {
-				fmt.Printf("New min: %s\n", item)
 				best = item
 			}
 		}

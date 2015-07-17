@@ -22,4 +22,4 @@ check:
 	golint ./... | fgrep -v "jmespath/astnodetype_string.go" | fgrep -v "jmespath/toktype_string.go"
 
 htmlc:
-	cd jmespath && go test -coverprofile="/tmp/jpcov" ./... && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
+	cd jmespath && go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
