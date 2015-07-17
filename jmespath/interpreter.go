@@ -10,24 +10,24 @@ import (
    interprets the AST to search through a JSON document.
 */
 
-// Execute takes an ASTNode and input data and interprets the AST directly.
-// It will produce the result of applying the JMESPath expression associated
-// with the ASTNode to the input data "value".
-type TreeInterpreter struct {
-	functionCaller *FunctionCaller
+type treeInterpreter struct {
+	fCall *functionCaller
 }
 
-func NewInterpreter() *TreeInterpreter {
-	interpreter := TreeInterpreter{}
-	interpreter.functionCaller = NewFunctionCaller()
+func newInterpreter() *treeInterpreter {
+	interpreter := treeInterpreter{}
+	interpreter.fCall = newFunctionCaller()
 	return &interpreter
 }
 
-type ExpRef struct {
+type expRef struct {
 	ref ASTNode
 }
 
-func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface{}, error) {
+// Execute takes an ASTNode and input data and interprets the AST directly.
+// It will produce the result of applying the JMESPath expression associated
+// with the ASTNode to the input data "value".
+func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface{}, error) {
 	switch node.nodeType {
 	case ASTComparator:
 		left, err := intr.Execute(node.children[0], value)
@@ -63,9 +63,9 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return leftNum <= rightNum, nil
 		}
 	case ASTExpRef:
-		return ExpRef{ref: node.children[0]}, nil
+		return expRef{ref: node.children[0]}, nil
 	case ASTFunctionExpression:
-		resolvedArgs := make([]interface{}, 0)
+		resolvedArgs := make([]interface{}, 0, 0)
 		for _, arg := range node.children {
 			current, err := intr.Execute(arg, value)
 			if err != nil {
@@ -73,7 +73,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.functionCaller.CallFunction(node.value.(string), resolvedArgs, intr)
+		return intr.fCall.CallFunction(node.value.(string), resolvedArgs, intr)
 	case ASTField:
 		if m, ok := value.(map[string]interface{}); ok {
 			key := node.value.(string)
@@ -90,7 +90,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return nil, nil
 		}
 		compareNode := node.children[2]
-		collected := make([]interface{}, 0)
+		collected := make([]interface{}, 0, 0)
 		for _, element := range sliceType {
 			result, err := intr.Execute(compareNode, element)
 			if err != nil {
@@ -117,7 +117,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			// Can't flatten a non slice object.
 			return nil, nil
 		}
-		flattened := make([]interface{}, 0)
+		flattened := make([]interface{}, 0, 0)
 		for _, element := range sliceType {
 			if elementSlice, ok := element.([]interface{}); ok {
 				flattened = append(flattened, elementSlice...)
@@ -161,7 +161,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if value == nil {
 			return nil, nil
 		}
-		collected := make([]interface{}, 0)
+		collected := make([]interface{}, 0, 0)
 		for _, child := range node.children {
 			current, err := intr.Execute(child, value)
 			if err != nil {
@@ -198,7 +198,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return nil, err
 		}
 		if sliceType, ok := left.([]interface{}); ok {
-			collected := make([]interface{}, 0)
+			collected := make([]interface{}, 0, 0)
 			var current interface{}
 			var err error
 			for _, element := range sliceType {
@@ -246,7 +246,7 @@ func (intr *TreeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, value := range mapType {
 			values = append(values, value)
 		}
-		collected := make([]interface{}, 0)
+		collected := make([]interface{}, 0, 0)
 		for _, element := range values {
 			current, err := intr.Execute(node.children[1], element)
 			if err != nil {

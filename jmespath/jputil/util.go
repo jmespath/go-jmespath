@@ -5,11 +5,12 @@ import (
 	"reflect"
 )
 
+// IsFalse determines if an object is false based on the JMESPath spec.
+// JMESPath defines false values to be any of:
+// - An empty string array, or hash.
+// - The boolean value false.
+// - nil
 func IsFalse(value interface{}) bool {
-	// A value is considered "false" like in JMESPath if its:
-	// - An empty string, array, hash.
-	// - The boolean value false.
-	// - nil
 	if value == nil {
 		return true
 	} else if value == false {
@@ -24,6 +25,9 @@ func IsFalse(value interface{}) bool {
 	return false
 }
 
+// ObjsEqual is a generic object equality check.
+// It will take two arbitrary objects and recursively determine
+// if they are equal.
 func ObjsEqual(left interface{}, right interface{}) bool {
 	if (left == nil) || (right == nil) {
 		return left == right
@@ -34,19 +38,22 @@ func ObjsEqual(left interface{}, right interface{}) bool {
 	return false
 }
 
+// SliceParam refers to a single part of a slice.
+// A slice consists of a start, a stop, and a step, similar to
+// python slices.
 type SliceParam struct {
 	N         int
 	Specified bool
 }
 
-// Slice supports [start:stop:step] style slicing.
+// Slice supports [start:stop:step] style slicing that's supported in JMESPath.
 func Slice(slice []interface{}, parts []SliceParam) ([]interface{}, error) {
 	computed, err := computeSliceParams(len(slice), parts)
 	if err != nil {
 		return nil, err
 	}
 	start, stop, step := computed[0], computed[1], computed[2]
-	result := make([]interface{}, 0)
+	result := make([]interface{}, 0, 0)
 	if step > 0 {
 		for i := start; i < stop; i += step {
 			result = append(result, slice[i])
@@ -117,6 +124,9 @@ func capSlice(length int, actual int, step int) int {
 	return actual
 }
 
+// ToArrayNum converts an empty interface type to a slice of float64.
+// If any element in the array cannot be converted, then nil is returned
+// along with a second value of false.
 func ToArrayNum(data interface{}) ([]float64, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
@@ -129,11 +139,15 @@ func ToArrayNum(data interface{}) ([]float64, bool) {
 			result[i] = item
 		}
 		return result, true
-	} else {
-		return nil, false
 	}
+	return nil, false
 }
 
+// ToArrayStr converts an empty interface type to a slice of strings.
+// If any element in the array cannot be converted, then nil is returned
+// along with a second value of false.  If the input data could be entirely
+// converted, then the converted data, along with a second value of true,
+// will be returned.
 func ToArrayStr(data interface{}) ([]string, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
@@ -146,7 +160,6 @@ func ToArrayStr(data interface{}) ([]string, bool) {
 			result[i] = item
 		}
 		return result, true
-	} else {
-		return nil, false
 	}
+	return nil, false
 }

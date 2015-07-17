@@ -75,7 +75,7 @@ func TestCanLexTokens(t *testing.T) {
 	assert := assert.New(t)
 	lexer := NewLexer()
 	for _, tt := range lexingTests {
-		tokens, err := lexer.Tokenize(tt.expression)
+		tokens, err := lexer.tokenize(tt.expression)
 		if assert.Nil(err) {
 			errMsg := fmt.Sprintf("Mismatch expected number of tokens: (expected: %s, actual: %s)",
 				tt.expected, tokens)
@@ -102,7 +102,7 @@ func TestLexingErrors(t *testing.T) {
 	assert := assert.New(t)
 	lexer := NewLexer()
 	for _, tt := range lexingErrorTests {
-		_, err := lexer.Tokenize(tt.expression)
+		_, err := lexer.tokenize(tt.expression)
 		assert.NotNil(err, fmt.Sprintf("Expected lexing error: %s", tt.msg))
 	}
 }

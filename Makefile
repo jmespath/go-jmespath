@@ -19,7 +19,13 @@ test:
 check:
 	cd jmespath
 	go vet ./...
-	golint ./... | fgrep -v "jmespath/astnodetype_string.go" | fgrep -v "jmespath/toktype_string.go"
+	@echo "golint ./..."
+	@lint=`golint ./...`; \
+	lint=`echo "$$lint" | grep -v "jmespath/astnodetype_string.go" | grep -v "jmespath/toktype_string.go"`; \
+	echo "$$lint"; \
+	if [ "$$lint" != "" ]; then exit 1; fi
+
+
 
 htmlc:
 	cd jmespath && go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov

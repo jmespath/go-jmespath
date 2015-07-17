@@ -148,8 +148,8 @@ func (lexer *Lexer) peek() rune {
 	return t
 }
 
-// Tokenize takes an expression and returns corresponding tokens.
-func (lexer *Lexer) Tokenize(expression string) ([]token, error) {
+// tokenize takes an expression and returns corresponding tokens.
+func (lexer *Lexer) tokenize(expression string) ([]token, error) {
 	var tokens []token
 	lexer.expression = expression
 	lexer.currentPos = 0

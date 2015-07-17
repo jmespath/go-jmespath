@@ -41,7 +41,7 @@ type argSpec struct {
 }
 
 type byExprString struct {
-	intr     *TreeInterpreter
+	intr     *treeInterpreter
 	node     ASTNode
 	items    []interface{}
 	hasError bool
@@ -80,7 +80,7 @@ func (a *byExprString) Less(i, j int) bool {
 }
 
 type byExprFloat struct {
-	intr     *TreeInterpreter
+	intr     *treeInterpreter
 	node     ASTNode
 	items    []interface{}
 	hasError bool
@@ -118,12 +118,12 @@ func (a *byExprFloat) Less(i, j int) bool {
 	return ith < jth
 }
 
-type FunctionCaller struct {
+type functionCaller struct {
 	functionTable map[string]functionEntry
 }
 
-func NewFunctionCaller() *FunctionCaller {
-	caller := &FunctionCaller{}
+func newFunctionCaller() *functionCaller {
+	caller := &functionCaller{}
 	caller.functionTable = map[string]functionEntry{
 		"length": functionEntry{
 			name: "length",
@@ -367,15 +367,15 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 		case jpAny:
 			return nil
 		case jpExpref:
-			if _, ok := arg.(ExpRef); ok {
+			if _, ok := arg.(expRef); ok {
 				return nil
 			}
 		}
 	}
-	return errors.New(fmt.Sprintf("Invalid type for: %v, expected: %#v", arg, a.types))
+	return fmt.Errorf("Invalid type for: %v, expected: %#v", arg, a.types)
 }
 
-func (f *FunctionCaller) CallFunction(name string, arguments []interface{}, intr *TreeInterpreter) (interface{}, error) {
+func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr *treeInterpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("Unknown function: " + name)
@@ -385,7 +385,7 @@ func (f *FunctionCaller) CallFunction(name string, arguments []interface{}, intr
 		return nil, err
 	}
 	if entry.hasExpRef {
-		extra := make([]interface{}, 0)
+		var extra []interface{}
 		extra = append(extra, intr)
 		resolvedArgs = append(extra, resolvedArgs...)
 	}
@@ -405,9 +405,8 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 		return float64(len(c)), nil
 	} else if c, ok := arg.(map[string]interface{}); ok {
 		return float64(len(c)), nil
-	} else {
-		return nil, errors.New("Could not compute length().")
 	}
+	return nil, errors.New("Could not compute length().")
 }
 
 func jpfStartsWith(arguments []interface{}) (interface{}, error) {
@@ -473,22 +472,22 @@ func jpfMax(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return best, nil
-	} else {
-		items, _ := jputil.ToArrayStr(arguments[0])
-		if len(items) == 0 {
-			return nil, nil
-		}
-		if len(items) == 1 {
-			return items[0], nil
-		}
-		best := items[0]
-		for _, item := range items[1:] {
-			if item > best {
-				best = item
-			}
-		}
-		return best, nil
 	}
+	// Otherwise we're dealing with a max() of strings.
+	items, _ := jputil.ToArrayStr(arguments[0])
+	if len(items) == 0 {
+		return nil, nil
+	}
+	if len(items) == 1 {
+		return items[0], nil
+	}
+	best := items[0]
+	for _, item := range items[1:] {
+		if item > best {
+			best = item
+		}
+	}
+	return best, nil
 }
 func jpfMerge(arguments []interface{}) (interface{}, error) {
 	final := make(map[string]interface{})
@@ -501,9 +500,9 @@ func jpfMerge(arguments []interface{}) (interface{}, error) {
 	return final, nil
 }
 func jpfMaxBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*TreeInterpreter)
+	intr := arguments[0].(*treeInterpreter)
 	arr := arguments[1].([]interface{})
-	exp := arguments[2].(ExpRef)
+	exp := arguments[2].(expRef)
 	node := exp.ref
 	if len(arr) == 0 {
 		return nil, nil
@@ -578,27 +577,27 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return best, nil
-	} else {
-		items, _ := jputil.ToArrayStr(arguments[0])
-		if len(items) == 0 {
-			return nil, nil
-		}
-		if len(items) == 1 {
-			return items[0], nil
-		}
-		best := items[0]
-		for _, item := range items[1:] {
-			if item < best {
-				best = item
-			}
-		}
-		return best, nil
 	}
+	items, _ := jputil.ToArrayStr(arguments[0])
+	if len(items) == 0 {
+		return nil, nil
+	}
+	if len(items) == 1 {
+		return items[0], nil
+	}
+	best := items[0]
+	for _, item := range items[1:] {
+		if item < best {
+			best = item
+		}
+	}
+	return best, nil
 }
+
 func jpfMinBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*TreeInterpreter)
+	intr := arguments[0].(*treeInterpreter)
 	arr := arguments[1].([]interface{})
-	exp := arguments[2].(ExpRef)
+	exp := arguments[2].(expRef)
 	node := exp.ref
 	if len(arr) == 0 {
 		return nil, nil
@@ -673,15 +672,15 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 }
 func jpfKeys(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := make([]interface{}, 0)
-	for key, _ := range arg {
+	collected := []interface{}{}
+	for key := range arg {
 		collected = append(collected, key)
 	}
 	return collected, nil
 }
 func jpfValues(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := make([]interface{}, 0)
+	collected := []interface{}{}
 	for _, value := range arg {
 		collected = append(collected, value)
 	}
@@ -696,21 +695,21 @@ func jpfSort(arguments []interface{}) (interface{}, error) {
 			final[i] = val
 		}
 		return final, nil
-	} else {
-		items, _ := jputil.ToArrayStr(arguments[0])
-		d := sort.StringSlice(items)
-		sort.Stable(d)
-		final := make([]interface{}, len(d))
-		for i, val := range d {
-			final[i] = val
-		}
-		return final, nil
 	}
+	// Otherwise we're dealing with sort()'ing strings.
+	items, _ := jputil.ToArrayStr(arguments[0])
+	d := sort.StringSlice(items)
+	sort.Stable(d)
+	final := make([]interface{}, len(d))
+	for i, val := range d {
+		final[i] = val
+	}
+	return final, nil
 }
 func jpfSortBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*TreeInterpreter)
+	intr := arguments[0].(*treeInterpreter)
 	arr := arguments[1].([]interface{})
-	exp := arguments[2].(ExpRef)
+	exp := arguments[2].(expRef)
 	node := exp.ref
 	if len(arr) == 0 {
 		return arr, nil
@@ -738,13 +737,12 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 	} else {
 		return nil, errors.New("Invalid type, must be number of string.")
 	}
-	return nil, errors.New("Invalid type, must be number of string.")
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
 	sep := arguments[0].(string)
 	// We can't just do arguments[1].([]string), we have to
 	// manually convert each item to a string.
-	arrayStr := make([]string, 0)
+	arrayStr := []string{}
 	for _, item := range arguments[1].([]interface{}) {
 		arrayStr = append(arrayStr, item.(string))
 	}
