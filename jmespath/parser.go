@@ -438,7 +438,9 @@ func (p *Parser) parseFilter(node ASTNode) (ASTNode, error) {
 	if err != nil {
 		return ASTNode{}, err
 	}
-	p.match(tRbracket)
+	if err := p.match(tRbracket); err != nil {
+		return ASTNode{}, err
+	}
 	if p.current() == tFlatten {
 		right = ASTNode{nodeType: ASTIdentity}
 	} else {
@@ -459,10 +461,14 @@ func (p *Parser) parseDotRHS(bindingPower int) (ASTNode, error) {
 	if tokensOneOf([]tokType{tQuotedIdentifier, tUnquotedIdentifier, tStar}, lookahead) {
 		return p.parseExpression(bindingPower)
 	} else if lookahead == tLbracket {
-		p.match(tLbracket)
+		if err := p.match(tLbracket); err != nil {
+			return ASTNode{}, err
+		}
 		return p.parseMultiSelectList()
 	} else if lookahead == tLbrace {
-		p.match(tLbrace)
+		if err := p.match(tLbrace); err != nil {
+			return ASTNode{}, err
+		}
 		return p.parseMultiSelectHash()
 	}
 	return ASTNode{}, p.syntaxError("Expected identifier, lbracket, or lbrace")
