@@ -10,10 +10,8 @@ Evaluate the JMESPath expression against JSON data from a file:
 
     jp.go -input /tmp/data.json "foo.bar.baz"
 
-Run JMESPath in test mode, as valid input for the jmespath.test
-test runner.
-
-    jp.go -testmode
+This program can also be used as an executable to the jp-compliance
+runner (github.com/jmespath/jmespath.test).
 
 */
 package main
@@ -42,32 +40,29 @@ func run() int {
 
 	astOnly := flag.Bool("ast", false, "Print the AST for the input expression and exit.")
 	inputFile := flag.String("input", "", "Filename containing JSON data to search. If not provided, data is read from stdin.")
-	testMode := flag.Bool("testmode", false, "Run JMESPath in test mode for the JMESPath compliance test runner.")
 
 	flag.Parse()
 	args := flag.Args()
-
+	if len(args) != 1 {
+		return errMsg("Expected a single argument (the JMESPath expression).")
+	}
 	if *astOnly && *testMode {
 		return errMsg("-ast and -testmode are mutually exclusive.")
 	}
+
+	expression := args[0]
+	parser := jmespath.NewParser()
+	parsed, err := parser.Parse(expression)
+	if err != nil {
+		return errMsg("Error parsing expression (%s): %s", expression, err)
+	}
 	if *astOnly {
-		if len(args) != 1 {
-			return errMsg("Expected a single argument (the JMESPath expression).")
-		}
-		expression := args[0]
-		parser := jmespath.NewParser()
-		parsed, err := parser.Parse(expression)
-		if err != nil {
-			return errMsg("Error parsing expression (%s): %s", expression, err)
-		}
 		pretty.Print(parsed)
 		fmt.Println("")
 		return 0
 	}
 
-	expression := args[0]
 	var inputData []byte
-	var err error
 	if *inputFile != "" {
 		inputData, err = ioutil.ReadFile(*inputFile)
 		if err != nil {
