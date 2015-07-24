@@ -10,8 +10,8 @@ generate:
 
 build:
 	go build ./...
-	rm -f cmd/jp/jp && cd cmd/jp/ && go build ./...
-	mv cmd/jp/jp .
+	rm -f cmd/jp.go/jp.go && cd cmd/jp.go/ && go build ./...
+	mv cmd/jp.go/jp.go .
 
 test:
 	go test -v ./...
@@ -24,8 +24,6 @@ check:
 	lint=`echo "$$lint" | grep -v "jmespath/astnodetype_string.go" | grep -v "jmespath/toktype_string.go"`; \
 	echo "$$lint"; \
 	if [ "$$lint" != "" ]; then exit 1; fi
-
-
 
 htmlc:
 	cd jmespath && go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
