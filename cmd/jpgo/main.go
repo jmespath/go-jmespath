@@ -1,4 +1,4 @@
-/* Basic command line interface for debug and testing purposes.
+/*Basic command line interface for debug and testing purposes.
 
 Examples:
 
