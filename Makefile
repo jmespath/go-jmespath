@@ -1,3 +1,6 @@
+
+CMD = jpgo
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  test                    to run all the tests"
@@ -9,10 +12,10 @@ generate:
 	go generate ./...
 
 build:
-	rm -f jp.go
+	rm -f $(CMD)
 	go build ./...
-	rm -f cmd/jp.go/jp.go && cd cmd/jp.go/ && go build ./...
-	mv cmd/jp.go/jp.go .
+	rm -f cmd/$(CMD)/$(CMD) && cd cmd/$(CMD)/ && go build ./...
+	mv cmd/$(CMD)/$(CMD) .
 
 test:
 	go test -v ./...

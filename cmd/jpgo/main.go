@@ -46,9 +46,6 @@ func run() int {
 	if len(args) != 1 {
 		return errMsg("Expected a single argument (the JMESPath expression).")
 	}
-	if *astOnly && *testMode {
-		return errMsg("-ast and -testmode are mutually exclusive.")
-	}
 
 	expression := args[0]
 	parser := jmespath.NewParser()
