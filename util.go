@@ -10,7 +10,7 @@ import (
 // - An empty string array, or hash.
 // - The boolean value false.
 // - nil
-func IsFalse(value interface{}) bool {
+func isFalse(value interface{}) bool {
 	if value == nil {
 		return true
 	} else if value == false {
@@ -28,7 +28,7 @@ func IsFalse(value interface{}) bool {
 // ObjsEqual is a generic object equality check.
 // It will take two arbitrary objects and recursively determine
 // if they are equal.
-func ObjsEqual(left interface{}, right interface{}) bool {
+func objsEqual(left interface{}, right interface{}) bool {
 	if (left == nil) || (right == nil) {
 		return left == right
 	}
@@ -41,13 +41,13 @@ func ObjsEqual(left interface{}, right interface{}) bool {
 // SliceParam refers to a single part of a slice.
 // A slice consists of a start, a stop, and a step, similar to
 // python slices.
-type SliceParam struct {
+type sliceParam struct {
 	N         int
 	Specified bool
 }
 
 // Slice supports [start:stop:step] style slicing that's supported in JMESPath.
-func Slice(slice []interface{}, parts []SliceParam) ([]interface{}, error) {
+func slice(slice []interface{}, parts []sliceParam) ([]interface{}, error) {
 	computed, err := computeSliceParams(len(slice), parts)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func Slice(slice []interface{}, parts []SliceParam) ([]interface{}, error) {
 	return result, nil
 }
 
-func computeSliceParams(length int, parts []SliceParam) ([]int, error) {
+func computeSliceParams(length int, parts []sliceParam) ([]int, error) {
 	var start, stop, step int
 	if !parts[2].Specified {
 		step = 1
@@ -127,7 +127,7 @@ func capSlice(length int, actual int, step int) int {
 // ToArrayNum converts an empty interface type to a slice of float64.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
-func ToArrayNum(data interface{}) ([]float64, bool) {
+func toArrayNum(data interface{}) ([]float64, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
 		result := make([]float64, len(d))
@@ -148,7 +148,7 @@ func ToArrayNum(data interface{}) ([]float64, bool) {
 // along with a second value of false.  If the input data could be entirely
 // converted, then the converted data, along with a second value of true,
 // will be returned.
-func ToArrayStr(data interface{}) ([]string, bool) {
+func toArrayStr(data interface{}) ([]string, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
 		result := make([]string, len(d))

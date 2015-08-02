@@ -14,7 +14,7 @@ func TestSlicePositiveStep(t *testing.T) {
 	input[2] = 2
 	input[3] = 3
 	input[4] = 4
-	result, err := Slice(input, []SliceParam{SliceParam{0, true}, SliceParam{3, true}, SliceParam{1, true}})
+	result, err := slice(input, []sliceParam{sliceParam{0, true}, sliceParam{3, true}, sliceParam{1, true}})
 	assert.Nil(err)
 	assert.Equal(input[:3], result)
 }

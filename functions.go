@@ -355,11 +355,11 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 				return nil
 			}
 		case jpArrayNumber:
-			if _, ok := ToArrayNum(arg); ok {
+			if _, ok := toArrayNum(arg); ok {
 				return nil
 			}
 		case jpArrayString:
-			if _, ok := ToArrayStr(arg); ok {
+			if _, ok := toArrayStr(arg); ok {
 				return nil
 			}
 		case jpAny:
@@ -456,7 +456,7 @@ func jpfFloor(arguments []interface{}) (interface{}, error) {
 	return math.Floor(val), nil
 }
 func jpfMax(arguments []interface{}) (interface{}, error) {
-	if items, ok := ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		if len(items) == 0 {
 			return nil, nil
 		}
@@ -472,7 +472,7 @@ func jpfMax(arguments []interface{}) (interface{}, error) {
 		return best, nil
 	}
 	// Otherwise we're dealing with a max() of strings.
-	items, _ := ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	if len(items) == 0 {
 		return nil, nil
 	}
@@ -553,7 +553,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 	}
 }
 func jpfSum(arguments []interface{}) (interface{}, error) {
-	items, _ := ToArrayNum(arguments[0])
+	items, _ := toArrayNum(arguments[0])
 	sum := 0.0
 	for _, item := range items {
 		sum += item
@@ -562,7 +562,7 @@ func jpfSum(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfMin(arguments []interface{}) (interface{}, error) {
-	if items, ok := ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		if len(items) == 0 {
 			return nil, nil
 		}
@@ -577,7 +577,7 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 		}
 		return best, nil
 	}
-	items, _ := ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	if len(items) == 0 {
 		return nil, nil
 	}
@@ -686,7 +686,7 @@ func jpfValues(arguments []interface{}) (interface{}, error) {
 	return collected, nil
 }
 func jpfSort(arguments []interface{}) (interface{}, error) {
-	if items, ok := ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		d := sort.Float64Slice(items)
 		sort.Stable(d)
 		final := make([]interface{}, len(d))
@@ -696,7 +696,7 @@ func jpfSort(arguments []interface{}) (interface{}, error) {
 		return final, nil
 	}
 	// Otherwise we're dealing with sort()'ing strings.
-	items, _ := ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	d := sort.StringSlice(items)
 	sort.Stable(d)
 	final := make([]interface{}, len(d))
