@@ -671,7 +671,7 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 }
 func jpfKeys(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := []interface{}{}
+	collected := make([]interface{}, 0, len(arg))
 	for key := range arg {
 		collected = append(collected, key)
 	}
@@ -679,7 +679,7 @@ func jpfKeys(arguments []interface{}) (interface{}, error) {
 }
 func jpfValues(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := []interface{}{}
+	collected := make([]interface{}, 0, len(arg))
 	for _, value := range arg {
 		collected = append(collected, value)
 	}
@@ -767,9 +767,7 @@ func jpfToArray(arguments []interface{}) (interface{}, error) {
 	if _, ok := arguments[0].([]interface{}); ok {
 		return arguments[0], nil
 	}
-	result := make([]interface{}, 1)
-	result[0] = arguments[0]
-	return result, nil
+	return arguments[:1:1], nil
 }
 func jpfToString(arguments []interface{}) (interface{}, error) {
 	if v, ok := arguments[0].(string); ok {
