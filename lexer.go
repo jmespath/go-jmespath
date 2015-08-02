@@ -122,7 +122,8 @@ func (t token) String() string {
 		t.tokenType, t.value, t.position, t.length)
 }
 
-func newLexer() *Lexer {
+// NewLexer creates a new JMESPath lexer.
+func NewLexer() *Lexer {
 	lexer := Lexer{}
 	return &lexer
 }
