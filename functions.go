@@ -513,7 +513,8 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t, ok := start.(float64); ok {
+	switch t := start.(type) {
+	case float64:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -531,7 +532,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else if t, ok := start.(string); ok {
+	case string:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -549,7 +550,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else {
+	default:
 		return nil, errors.New("Invalid type, must be number of string.")
 	}
 }
