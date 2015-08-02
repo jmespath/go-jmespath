@@ -258,5 +258,5 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return collected, nil
 	}
-	return nil, errors.New("FAILED")
+	return nil, errors.New("unknown error in AST evaluation")
 }

@@ -320,7 +320,7 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	}
 	if !e.arguments[len(e.arguments)-1].variadic {
 		if len(e.arguments) != len(arguments) {
-			return nil, errors.New("Incorrect number of args.")
+			return nil, errors.New("incorrect number of args")
 		}
 		for i, spec := range e.arguments {
 			userArg := arguments[i]
@@ -378,7 +378,7 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr *treeInterpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
-		return nil, errors.New("Unknown function: " + name)
+		return nil, errors.New("unknown function: " + name)
 	}
 	resolvedArgs, err := entry.resolveArgs(arguments)
 	if err != nil {
@@ -406,7 +406,7 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 	} else if c, ok := arg.(map[string]interface{}); ok {
 		return float64(len(c)), nil
 	}
-	return nil, errors.New("Could not compute length().")
+	return nil, errors.New("could not compute length()")
 }
 
 func jpfStartsWith(arguments []interface{}) (interface{}, error) {
@@ -524,7 +524,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("Invalid type, must be number")
+				return nil, errors.New("invalid type, must be number")
 			}
 			if current > bestVal {
 				bestVal = current
@@ -542,7 +542,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("Invalid type, must be string")
+				return nil, errors.New("invalid type, must be string")
 			}
 			if current > bestVal {
 				bestVal = current
@@ -551,7 +551,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	default:
-		return nil, errors.New("Invalid type, must be number of string.")
+		return nil, errors.New("invalid type, must be number of string")
 	}
 }
 func jpfSum(arguments []interface{}) (interface{}, error) {
@@ -619,7 +619,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("Invalid type, must be number")
+				return nil, errors.New("invalid type, must be number")
 			}
 			if current < bestVal {
 				bestVal = current
@@ -637,7 +637,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("Invalid type, must be string")
+				return nil, errors.New("invalid type, must be string")
 			}
 			if current < bestVal {
 				bestVal = current
@@ -646,7 +646,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	} else {
-		return nil, errors.New("Invalid type, must be number of string.")
+		return nil, errors.New("invalid type, must be number of string.")
 	}
 }
 func jpfType(arguments []interface{}) (interface{}, error) {
@@ -669,7 +669,7 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 	if arg == true || arg == false {
 		return "boolean", nil
 	}
-	return nil, errors.New("Unknown type")
+	return nil, errors.New("unknown type")
 }
 func jpfKeys(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
@@ -725,18 +725,18 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 		sortable := &byExprFloat{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("Error in sort_by comparison")
+			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
 	} else if _, ok := start.(string); ok {
 		sortable := &byExprString{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("Error in sort_by comparison")
+			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
 	} else {
-		return nil, errors.New("Invalid type, must be number of string.")
+		return nil, errors.New("invalid type, must be number of string.")
 	}
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
@@ -807,7 +807,7 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 	if arg == true || arg == false {
 		return nil, nil
 	}
-	return nil, errors.New("Unknown type")
+	return nil, errors.New("unknown type")
 }
 func jpfNotNull(arguments []interface{}) (interface{}, error) {
 	for _, arg := range arguments {
