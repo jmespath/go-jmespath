@@ -11,15 +11,16 @@ import (
 // - The boolean value false.
 // - nil
 func isFalse(value interface{}) bool {
-	if value == nil {
-		return true
-	} else if value == false {
-		return true
-	} else if aSlice, ok := value.([]interface{}); ok && len(aSlice) == 0 {
-		return true
-	} else if aMap, ok := value.(map[string]interface{}); ok && len(aMap) == 0 {
-		return true
-	} else if aStr, ok := value.(string); ok && len(aStr) == 0 {
+	switch v := value.(type) {
+	case bool:
+		return !v
+	case []interface{}:
+		return len(v) == 0
+	case map[string]interface{}:
+		return len(v) == 0
+	case string:
+		return len(v) == 0
+	case nil:
 		return true
 	}
 	return false
@@ -32,10 +33,7 @@ func objsEqual(left interface{}, right interface{}) bool {
 	if (left == nil) || (right == nil) {
 		return left == right
 	}
-	if reflect.DeepEqual(left, right) {
-		return true
-	}
-	return false
+	return reflect.DeepEqual(left, right)
 }
 
 // SliceParam refers to a single part of a slice.
