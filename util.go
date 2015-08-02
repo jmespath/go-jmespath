@@ -1,4 +1,4 @@
-package jputil
+package jmespath
 
 import (
 	"errors"

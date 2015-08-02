@@ -2,8 +2,6 @@ package jmespath
 
 import (
 	"errors"
-
-	"github.com/jmespath/jmespath.go/jputil"
 )
 
 /* This is a tree based interpreter.  It walks the AST and directly
@@ -40,9 +38,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		switch node.value {
 		case tEQ:
-			return jputil.ObjsEqual(left, right), nil
+			return ObjsEqual(left, right), nil
 		case tNE:
-			return !jputil.ObjsEqual(left, right), nil
+			return !ObjsEqual(left, right), nil
 		}
 		leftNum, ok := left.(float64)
 		if !ok {
@@ -96,7 +94,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			if err != nil {
 				return nil, err
 			}
-			if !jputil.IsFalse(result) {
+			if !IsFalse(result) {
 				current, err := intr.Execute(node.children[1], element)
 				if err != nil {
 					return nil, err
@@ -175,7 +173,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, err
 		}
-		if jputil.IsFalse(matched) {
+		if IsFalse(matched) {
 			matched, err = intr.Execute(node.children[1], value)
 			if err != nil {
 				return nil, err
@@ -225,14 +223,14 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return nil, nil
 		}
 		parts := node.value.([]*int)
-		sliceParams := make([]jputil.SliceParam, 3)
+		sliceParams := make([]SliceParam, 3)
 		for i, part := range parts {
 			if part != nil {
 				sliceParams[i].Specified = true
 				sliceParams[i].N = *part
 			}
 		}
-		return jputil.Slice(sliceType, sliceParams)
+		return Slice(sliceType, sliceParams)
 	case ASTValueProjection:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
