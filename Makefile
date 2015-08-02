@@ -25,7 +25,7 @@ check:
 	go vet ./...
 	@echo "golint ./..."
 	@lint=`golint ./...`; \
-	lint=`echo "$$lint" | grep -v "jmespath/astnodetype_string.go" | grep -v "jmespath/toktype_string.go"`; \
+	lint=`echo "$$lint" | grep -v "astnodetype_string.go" | grep -v "toktype_string.go"`; \
 	echo "$$lint"; \
 	if [ "$$lint" != "" ]; then exit 1; fi
 

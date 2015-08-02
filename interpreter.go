@@ -3,7 +3,7 @@ package jmespath
 import (
 	"errors"
 
-	"github.com/jmespath/jmespath.go/jmespath/jputil"
+	"github.com/jmespath/jmespath.go/jputil"
 )
 
 /* This is a tree based interpreter.  It walks the AST and directly

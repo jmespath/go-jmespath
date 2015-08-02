@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jmespath/jmespath.go/jmespath/jputil"
+	"github.com/jmespath/jmespath.go/jputil"
 )
 
 type jpFunction func(arguments []interface{}) (interface{}, error)
