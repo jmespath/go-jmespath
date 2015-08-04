@@ -18,3 +18,25 @@ func TestSlicePositiveStep(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(input[:3], result)
 }
+
+func TestIsFalse(t *testing.T) {
+	assert := assert.New(t)
+	assert.True(isFalse(false))
+	assert.True(isFalse(""))
+	var empty []interface{}
+	assert.True(isFalse(empty))
+	m := make(map[string]interface{})
+	assert.True(isFalse(m))
+	assert.True(isFalse(nil))
+}
+
+func TestObjsEqual(t *testing.T) {
+	assert := assert.New(t)
+	assert.True(objsEqual("foo", "foo"))
+	assert.True(objsEqual(20, 20))
+	assert.True(objsEqual([]int{1, 2, 3}, []int{1, 2, 3}))
+	assert.True(objsEqual(nil, nil))
+	assert.True(!objsEqual(nil, "foo"))
+	assert.True(objsEqual([]int{}, []int{}))
+	assert.True(!objsEqual([]int{}, nil))
+}

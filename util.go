@@ -30,9 +30,6 @@ func isFalse(value interface{}) bool {
 // It will take two arbitrary objects and recursively determine
 // if they are equal.
 func objsEqual(left interface{}, right interface{}) bool {
-	if (left == nil) || (right == nil) {
-		return left == right
-	}
 	return reflect.DeepEqual(left, right)
 }
 
