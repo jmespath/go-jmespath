@@ -26,7 +26,7 @@ import (
 import (
 	"encoding/json"
 
-	"github.com/jmespath/jmespath.go/jmespath"
+	"github.com/jmespath/jmespath.go"
 	"github.com/kr/pretty"
 )
 
@@ -44,7 +44,9 @@ func run() int {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
-		return errMsg("Expected a single argument (the JMESPath expression).")
+		fmt.Fprintf(os.Stderr, "Usage:\n\n")
+		flag.PrintDefaults()
+		return errMsg("\nError: expected a single argument (the JMESPath expression).")
 	}
 
 	expression := args[0]

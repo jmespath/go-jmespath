@@ -8,8 +8,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/jmespath/jmespath.go/jmespath/jputil"
 )
 
 type jpFunction func(arguments []interface{}) (interface{}, error)
@@ -320,7 +318,7 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	}
 	if !e.arguments[len(e.arguments)-1].variadic {
 		if len(e.arguments) != len(arguments) {
-			return nil, errors.New("Incorrect number of args.")
+			return nil, errors.New("incorrect number of args")
 		}
 		for i, spec := range e.arguments {
 			userArg := arguments[i]
@@ -357,11 +355,11 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 				return nil
 			}
 		case jpArrayNumber:
-			if _, ok := jputil.ToArrayNum(arg); ok {
+			if _, ok := toArrayNum(arg); ok {
 				return nil
 			}
 		case jpArrayString:
-			if _, ok := jputil.ToArrayStr(arg); ok {
+			if _, ok := toArrayStr(arg); ok {
 				return nil
 			}
 		case jpAny:
@@ -378,7 +376,7 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr *treeInterpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
-		return nil, errors.New("Unknown function: " + name)
+		return nil, errors.New("unknown function: " + name)
 	}
 	resolvedArgs, err := entry.resolveArgs(arguments)
 	if err != nil {
@@ -406,7 +404,7 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 	} else if c, ok := arg.(map[string]interface{}); ok {
 		return float64(len(c)), nil
 	}
-	return nil, errors.New("Could not compute length().")
+	return nil, errors.New("could not compute length()")
 }
 
 func jpfStartsWith(arguments []interface{}) (interface{}, error) {
@@ -458,7 +456,7 @@ func jpfFloor(arguments []interface{}) (interface{}, error) {
 	return math.Floor(val), nil
 }
 func jpfMax(arguments []interface{}) (interface{}, error) {
-	if items, ok := jputil.ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		if len(items) == 0 {
 			return nil, nil
 		}
@@ -474,7 +472,7 @@ func jpfMax(arguments []interface{}) (interface{}, error) {
 		return best, nil
 	}
 	// Otherwise we're dealing with a max() of strings.
-	items, _ := jputil.ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	if len(items) == 0 {
 		return nil, nil
 	}
@@ -513,7 +511,8 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t, ok := start.(float64); ok {
+	switch t := start.(type) {
+	case float64:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -523,7 +522,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("Invalid type, must be number")
+				return nil, errors.New("invalid type, must be number")
 			}
 			if current > bestVal {
 				bestVal = current
@@ -531,7 +530,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else if t, ok := start.(string); ok {
+	case string:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -541,7 +540,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("Invalid type, must be string")
+				return nil, errors.New("invalid type, must be string")
 			}
 			if current > bestVal {
 				bestVal = current
@@ -549,12 +548,12 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else {
-		return nil, errors.New("Invalid type, must be number of string.")
+	default:
+		return nil, errors.New("invalid type, must be number of string")
 	}
 }
 func jpfSum(arguments []interface{}) (interface{}, error) {
-	items, _ := jputil.ToArrayNum(arguments[0])
+	items, _ := toArrayNum(arguments[0])
 	sum := 0.0
 	for _, item := range items {
 		sum += item
@@ -563,7 +562,7 @@ func jpfSum(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfMin(arguments []interface{}) (interface{}, error) {
-	if items, ok := jputil.ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		if len(items) == 0 {
 			return nil, nil
 		}
@@ -578,7 +577,7 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 		}
 		return best, nil
 	}
-	items, _ := jputil.ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	if len(items) == 0 {
 		return nil, nil
 	}
@@ -618,7 +617,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("Invalid type, must be number")
+				return nil, errors.New("invalid type, must be number")
 			}
 			if current < bestVal {
 				bestVal = current
@@ -636,7 +635,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("Invalid type, must be string")
+				return nil, errors.New("invalid type, must be string")
 			}
 			if current < bestVal {
 				bestVal = current
@@ -645,7 +644,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	} else {
-		return nil, errors.New("Invalid type, must be number of string.")
+		return nil, errors.New("invalid type, must be number of string")
 	}
 }
 func jpfType(arguments []interface{}) (interface{}, error) {
@@ -668,11 +667,11 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 	if arg == true || arg == false {
 		return "boolean", nil
 	}
-	return nil, errors.New("Unknown type")
+	return nil, errors.New("unknown type")
 }
 func jpfKeys(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := []interface{}{}
+	collected := make([]interface{}, 0, len(arg))
 	for key := range arg {
 		collected = append(collected, key)
 	}
@@ -680,14 +679,14 @@ func jpfKeys(arguments []interface{}) (interface{}, error) {
 }
 func jpfValues(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0].(map[string]interface{})
-	collected := []interface{}{}
+	collected := make([]interface{}, 0, len(arg))
 	for _, value := range arg {
 		collected = append(collected, value)
 	}
 	return collected, nil
 }
 func jpfSort(arguments []interface{}) (interface{}, error) {
-	if items, ok := jputil.ToArrayNum(arguments[0]); ok {
+	if items, ok := toArrayNum(arguments[0]); ok {
 		d := sort.Float64Slice(items)
 		sort.Stable(d)
 		final := make([]interface{}, len(d))
@@ -697,7 +696,7 @@ func jpfSort(arguments []interface{}) (interface{}, error) {
 		return final, nil
 	}
 	// Otherwise we're dealing with sort()'ing strings.
-	items, _ := jputil.ToArrayStr(arguments[0])
+	items, _ := toArrayStr(arguments[0])
 	d := sort.StringSlice(items)
 	sort.Stable(d)
 	final := make([]interface{}, len(d))
@@ -724,18 +723,18 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 		sortable := &byExprFloat{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("Error in sort_by comparison")
+			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
 	} else if _, ok := start.(string); ok {
 		sortable := &byExprString{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("Error in sort_by comparison")
+			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
 	} else {
-		return nil, errors.New("Invalid type, must be number of string.")
+		return nil, errors.New("invalid type, must be number of string")
 	}
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
@@ -768,9 +767,7 @@ func jpfToArray(arguments []interface{}) (interface{}, error) {
 	if _, ok := arguments[0].([]interface{}); ok {
 		return arguments[0], nil
 	}
-	result := make([]interface{}, 1)
-	result[0] = arguments[0]
-	return result, nil
+	return arguments[:1:1], nil
 }
 func jpfToString(arguments []interface{}) (interface{}, error) {
 	if v, ok := arguments[0].(string); ok {
@@ -806,7 +803,7 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 	if arg == true || arg == false {
 		return nil, nil
 	}
-	return nil, errors.New("Unknown type")
+	return nil, errors.New("unknown type")
 }
 func jpfNotNull(arguments []interface{}) (interface{}, error) {
 	for _, arg := range arguments {

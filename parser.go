@@ -86,7 +86,8 @@ type Parser struct {
 	index      int
 }
 
-func newParser() *Parser {
+// NewParser creates a new JMESPath parser.
+func NewParser() *Parser {
 	p := Parser{}
 	return &p
 }
