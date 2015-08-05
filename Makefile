@@ -21,7 +21,6 @@ test:
 	go test -v ./...
 
 check:
-	cd jmespath
 	go vet ./...
 	@echo "golint ./..."
 	@lint=`golint ./...`; \
@@ -30,4 +29,4 @@ check:
 	if [ "$$lint" != "" ]; then exit 1; fi
 
 htmlc:
-	cd jmespath && go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
+	go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
