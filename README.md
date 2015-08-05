@@ -1,6 +1,6 @@
-# jmespath.go - A JMESPath implementation in Go
+# go-jmespath - A JMESPath implementation in Go
 
-[![Build Status](https://img.shields.io/travis/jmespath/jmespath.go.svg)](https://travis-ci.org/jmespath/jmespath.go)
+[![Build Status](https://img.shields.io/travis/jmespath/jmespath.go.svg)](https://travis-ci.org/jmespath/go-jmespath)
 
 
 
