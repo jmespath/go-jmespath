@@ -26,7 +26,7 @@ import (
 import (
 	"encoding/json"
 
-	"github.com/jmespath/jmespath.go"
+	"github.com/jmespath/go-jmespath"
 	"github.com/kr/pretty"
 )
 
