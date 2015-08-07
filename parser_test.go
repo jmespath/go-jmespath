@@ -22,6 +22,8 @@ var parsingErrorTests = []struct {
 	{`{foo bar}`, "Invalid"},
 	{`[foo bar]`, "Invalid"},
 	{`foo@`, "Invalid"},
+	{`&&&&&&&&&&&&t(`, "Invalid"},
+	{`[*][`, "Invalid"},
 }
 
 func TestParsingErrors(t *testing.T) {

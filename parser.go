@@ -212,7 +212,10 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 		name := node.value
 		var args []ASTNode
 		for p.current() != tRparen {
-			expression, _ := p.parseExpression(0)
+			expression, err := p.parseExpression(0)
+			if err != nil {
+				return ASTNode{}, err
+			}
 			if p.current() == tComma {
 				if err := p.match(tComma); err != nil {
 					return ASTNode{}, err
@@ -331,7 +334,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 			p.advance()
 			right, err := p.parseProjectionRHS(bindingPowers[tStar])
 			if err != nil {
-				return ASTNode{}, nil
+				return ASTNode{}, err
 			}
 			return ASTNode{
 				nodeType: ASTProjection,
@@ -369,10 +372,13 @@ func (p *Parser) parseMultiSelectList() (ASTNode, error) {
 		}
 	}
 	err := p.match(tRbracket)
+	if err != nil {
+		return ASTNode{}, err
+	}
 	return ASTNode{
 		nodeType: ASTMultiSelectList,
 		children: expressions,
-	}, err
+	}, nil
 }
 
 func (p *Parser) parseMultiSelectHash() (ASTNode, error) {
