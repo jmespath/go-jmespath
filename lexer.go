@@ -22,9 +22,10 @@ const eof = -1
 
 // Lexer contains information about the expression being tokenized.
 type Lexer struct {
-	expression string // The expression provided by the user.
-	currentPos int    // The current position in the string.
-	lastWidth  int    // The width of the current rune.  This
+	expression string       // The expression provided by the user.
+	currentPos int          // The current position in the string.
+	lastWidth  int          // The width of the current rune.  This
+	buf        bytes.Buffer // Internal buffer used for building up values.
 }
 
 // SyntaxError is the main error used whenever a lexing or parsing error occurs.
@@ -266,12 +267,11 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	start := lexer.currentPos
 	currentIndex := start
 	current := lexer.next()
-	var buffer bytes.Buffer
 	for current != '\'' && lexer.peek() != eof {
 		if current == '\\' && lexer.peek() == '\'' {
 			chunk := lexer.expression[currentIndex : lexer.currentPos-1]
-			buffer.WriteString(chunk)
-			buffer.WriteString("'")
+			lexer.buf.WriteString(chunk)
+			lexer.buf.WriteString("'")
 			lexer.next()
 			currentIndex = lexer.currentPos
 		}
@@ -287,10 +287,11 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 		}
 	}
 	if currentIndex < lexer.currentPos {
-		chunk := lexer.expression[currentIndex : lexer.currentPos-1]
-		buffer.WriteString(chunk)
+		lexer.buf.WriteString(lexer.expression[currentIndex : lexer.currentPos-1])
 	}
-	value := buffer.String()
+	value := lexer.buf.String()
+	// Reset the buffer so it can reused again.
+	lexer.buf.Reset()
 	return token{
 		tokenType: tStringLiteral,
 		value:     value,
