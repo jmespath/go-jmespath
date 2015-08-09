@@ -88,31 +88,13 @@ var basicTokens = map[rune]tokType{
 	'&': tExpref,
 }
 
-var identifierStart = map[rune]bool{
-	'a': true, 'b': true, 'c': true, 'd': true, 'e': true, 'f': true,
-	'g': true, 'h': true, 'i': true, 'j': true, 'k': true, 'l': true,
-	'm': true, 'n': true, 'o': true, 'p': true, 'q': true, 'r': true,
-	's': true, 't': true, 'u': true, 'v': true, 'w': true, 'x': true,
-	'y': true, 'z': true, 'A': true, 'B': true, 'C': true, 'D': true,
-	'E': true, 'F': true, 'G': true, 'H': true, 'I': true, 'J': true,
-	'K': true, 'L': true, 'M': true, 'N': true, 'O': true, 'P': true,
-	'Q': true, 'R': true, 'S': true, 'T': true, 'U': true, 'V': true,
-	'W': true, 'X': true, 'Y': true, 'Z': true, '_': true,
-}
+// Bit mask for [a-zA-Z_] shifted down 64 bits to fit in a single uint64.
+// When using this bitmask just be sure to shift the rune down 64 bits
+// before checking against identifierStartBits.
+const identifierStartBits uint64 = 576460745995190270
 
-var identifierTrailing = map[rune]bool{
-	'a': true, 'b': true, 'c': true, 'd': true, 'e': true, 'f': true,
-	'g': true, 'h': true, 'i': true, 'j': true, 'k': true, 'l': true,
-	'm': true, 'n': true, 'o': true, 'p': true, 'q': true, 'r': true,
-	's': true, 't': true, 'u': true, 'v': true, 'w': true, 'x': true,
-	'y': true, 'z': true, 'A': true, 'B': true, 'C': true, 'D': true,
-	'E': true, 'F': true, 'G': true, 'H': true, 'I': true, 'J': true,
-	'K': true, 'L': true, 'M': true, 'N': true, 'O': true, 'P': true,
-	'Q': true, 'R': true, 'S': true, 'T': true, 'U': true, 'V': true,
-	'W': true, 'X': true, 'Y': true, 'Z': true, '_': true, '0': true,
-	'1': true, '2': true, '3': true, '4': true, '5': true, '6': true,
-	'7': true, '8': true, '9': true,
-}
+// Bit mask for [a-zA-Z0-9], 128 bits -> 2 uint64s.
+var identifierTrailingBits [2]uint64 = [2]uint64{287948901175001088, 576460745995190270}
 
 var whiteSpace = map[rune]bool{
 	' ': true, '\t': true, '\n': true, '\r': true,
@@ -159,7 +141,7 @@ func (lexer *Lexer) tokenize(expression string) ([]token, error) {
 loop:
 	for {
 		r := lexer.next()
-		if _, ok := identifierStart[r]; ok {
+		if identifierStartBits&(1<<(uint64(r)-64)) > 0 {
 			t := lexer.consumeUnquotedIdentifier()
 			tokens = append(tokens, t)
 		} else if val, ok := basicTokens[r]; ok {
@@ -393,7 +375,7 @@ func (lexer *Lexer) consumeUnquotedIdentifier() token {
 	start := lexer.currentPos - lexer.lastWidth
 	for {
 		r := lexer.next()
-		if _, ok := identifierTrailing[r]; !ok {
+		if r < 0 || r > 128 || identifierTrailingBits[uint64(r)/64]&(1<<(uint64(r)%64)) == 0 {
 			lexer.back()
 			break
 		}
