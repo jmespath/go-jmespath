@@ -1,6 +1,7 @@
 package jmespath
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,26 @@ type sliceType struct {
 	A string
 	B []scalars
 	C []*scalars
+}
+
+type benchmarkStruct struct {
+	Fooasdfasdfasdfasdf string
+}
+
+type benchmarkNested struct {
+	Fooasdfasdfasdfasdf nestedA
+}
+
+type nestedA struct {
+	Fooasdfasdfasdfasdf nestedB
+}
+
+type nestedB struct {
+	Fooasdfasdfasdfasdf nestedC
+}
+
+type nestedC struct {
+	Fooasdfasdfasdfasdf string
 }
 
 func TestCanSupportEmptyInterface(t *testing.T) {
@@ -75,4 +96,43 @@ func TestCanSupportStructWithSliceLowerCased(t *testing.T) {
 	result, err := Search("b[-1].foo", data)
 	assert.Nil(err)
 	assert.Equal("correct", result)
+}
+
+func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
+	intr := newInterpreter()
+	parser := NewParser()
+	ast, _ := parser.Parse("fooasdfasdfasdfasdf")
+	data := benchmarkStruct{"foobarbazqux"}
+	for i := 0; i < b.N; i++ {
+		intr.Execute(ast, &data)
+	}
+}
+
+func BenchmarkInterpretNestedStruct(b *testing.B) {
+	intr := newInterpreter()
+	parser := NewParser()
+	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
+	data := benchmarkNested{
+		nestedA{
+			nestedB{
+				nestedC{"foobarbazqux"},
+			},
+		},
+	}
+	for i := 0; i < b.N; i++ {
+		intr.Execute(ast, &data)
+	}
+}
+
+func BenchmarkInterpretNestedMaps(b *testing.B) {
+	jsonData := []byte(`{"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": "foobarbazqux"}}}}`)
+	var data interface{}
+	json.Unmarshal(jsonData, &data)
+
+	intr := newInterpreter()
+	parser := NewParser()
+	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
+	for i := 0; i < b.N; i++ {
+		intr.Execute(ast, data)
+	}
 }
