@@ -94,7 +94,7 @@ var basicTokens = map[rune]tokType{
 const identifierStartBits uint64 = 576460745995190270
 
 // Bit mask for [a-zA-Z0-9], 128 bits -> 2 uint64s.
-var identifierTrailingBits [2]uint64 = [2]uint64{287948901175001088, 576460745995190270}
+var identifierTrailingBits = [2]uint64{287948901175001088, 576460745995190270}
 
 var whiteSpace = map[rune]bool{
 	' ': true, '\t': true, '\n': true, '\r': true,
