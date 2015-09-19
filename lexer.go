@@ -38,7 +38,11 @@ type SyntaxError struct {
 func (e SyntaxError) Error() string {
 	// In the future, it would be good to underline the specific
 	// location where the error occurred.
-	return e.msg
+	return "SyntaxError: " + e.msg
+}
+
+func (e SyntaxError) HighlightLocation() string {
+	return e.Expression + "\n" + strings.Repeat(" ", e.Offset) + "^"
 }
 
 //go:generate stringer -type=tokType
@@ -286,7 +290,7 @@ func (lexer *Lexer) syntaxError(msg string) SyntaxError {
 	return SyntaxError{
 		msg:        msg,
 		Expression: lexer.expression,
-		Offset:     lexer.currentPos,
+		Offset:     lexer.currentPos - 1,
 	}
 }
 

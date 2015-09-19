@@ -293,7 +293,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case tQuotedIdentifier:
 		node := ASTNode{nodeType: ASTField, value: token.value}
 		if p.current() == tLparen {
-			return ASTNode{}, p.syntaxError("Can't have quoted identifier as function name.")
+			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function name.", token)
 		}
 		return node, nil
 	case tStar:
@@ -349,10 +349,10 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		expression, err := p.parseExpression(bindingPowers[tExpref])
 		return ASTNode{nodeType: ASTExpRef, children: []ASTNode{expression}}, err
 	case tEOF:
-		return ASTNode{}, SyntaxError{msg: "Incomplete expression", Expression: p.expression, Offset: token.position}
+		return ASTNode{}, p.syntaxErrorToken("Incomplete expression", token)
 	}
 
-	return ASTNode{}, p.syntaxError("Invalid token")
+	return ASTNode{}, p.syntaxErrorToken("Invalid token: "+token.tokenType.String(), token)
 }
 
 func (p *Parser) parseMultiSelectList() (ASTNode, error) {
@@ -530,5 +530,16 @@ func (p *Parser) syntaxError(msg string) SyntaxError {
 		msg:        msg,
 		Expression: p.expression,
 		Offset:     p.lookaheadToken(0).position,
+	}
+}
+
+// Create a SyntaxError based on the provided token.
+// This differs from syntaxError() which creates a SyntaxError
+// based on the current lookahead token.
+func (p *Parser) syntaxErrorToken(msg string, t token) SyntaxError {
+	return SyntaxError{
+		msg:        msg,
+		Expression: p.expression,
+		Offset:     t.position,
 	}
 }
