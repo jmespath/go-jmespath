@@ -107,7 +107,8 @@ func (p *Parser) Parse(expression string) (ASTNode, error) {
 		return ASTNode{}, err
 	}
 	if p.current() != tEOF {
-		return ASTNode{}, p.syntaxError(fmt.Sprintf("Unexpected remaining token: %s", p.current()))
+		return ASTNode{}, p.syntaxError(fmt.Sprintf(
+			"Unexpected token at the end of the expresssion: %s", p.current()))
 	}
 	return parsed, nil
 }
@@ -165,7 +166,8 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 			parts[index] = &parsedInt
 			p.advance()
 		} else {
-			return ASTNode{}, p.syntaxError("Syntax error")
+			return ASTNode{}, p.syntaxError(
+				"Expected tColon or tNumber" + ", received: " + p.current().String())
 		}
 		current = p.current()
 	}
@@ -256,6 +258,9 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 		var err error
 		if tokenType == tNumber || tokenType == tColon {
 			right, err = p.parseIndexExpression()
+			if err != nil {
+				return ASTNode{}, err
+			}
 			return p.projectIfSlice(node, right)
 		}
 		// Otherwise this is a projection.
@@ -266,10 +271,13 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 			return ASTNode{}, err
 		}
 		right, err = p.parseProjectionRHS(bindingPowers[tStar])
+		if err != nil {
+			return ASTNode{}, err
+		}
 		return ASTNode{
 			nodeType: ASTProjection,
 			children: []ASTNode{node, right},
-		}, err
+		}, nil
 	}
 	return ASTNode{}, p.syntaxError("Unexpected token: " + tokenType.String())
 }
