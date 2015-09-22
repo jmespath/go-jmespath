@@ -53,7 +53,10 @@ func run() int {
 	parser := jmespath.NewParser()
 	parsed, err := parser.Parse(expression)
 	if err != nil {
-		return errMsg("Error parsing expression (%s): %s", expression, err)
+		if syntaxError, ok := err.(jmespath.SyntaxError); ok {
+			return errMsg("%s\n%s\n", syntaxError, syntaxError.HighlightLocation())
+		}
+		return errMsg("%s", err)
 	}
 	if *astOnly {
 		pretty.Print(parsed)

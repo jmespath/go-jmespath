@@ -107,7 +107,8 @@ func (p *Parser) Parse(expression string) (ASTNode, error) {
 		return ASTNode{}, err
 	}
 	if p.current() != tEOF {
-		return ASTNode{}, p.syntaxError(fmt.Sprintf("Unexpected remaining token: %s", p.current()))
+		return ASTNode{}, p.syntaxError(fmt.Sprintf(
+			"Unexpected token at the end of the expresssion: %s", p.current()))
 	}
 	return parsed, nil
 }
@@ -165,7 +166,8 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 			parts[index] = &parsedInt
 			p.advance()
 		} else {
-			return ASTNode{}, p.syntaxError("Syntax error")
+			return ASTNode{}, p.syntaxError(
+				"Expected tColon or tNumber" + ", received: " + p.current().String())
 		}
 		current = p.current()
 	}
@@ -256,6 +258,9 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 		var err error
 		if tokenType == tNumber || tokenType == tColon {
 			right, err = p.parseIndexExpression()
+			if err != nil {
+				return ASTNode{}, err
+			}
 			return p.projectIfSlice(node, right)
 		}
 		// Otherwise this is a projection.
@@ -266,10 +271,13 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 			return ASTNode{}, err
 		}
 		right, err = p.parseProjectionRHS(bindingPowers[tStar])
+		if err != nil {
+			return ASTNode{}, err
+		}
 		return ASTNode{
 			nodeType: ASTProjection,
 			children: []ASTNode{node, right},
-		}, err
+		}, nil
 	}
 	return ASTNode{}, p.syntaxError("Unexpected token: " + tokenType.String())
 }
@@ -293,7 +301,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case tQuotedIdentifier:
 		node := ASTNode{nodeType: ASTField, value: token.value}
 		if p.current() == tLparen {
-			return ASTNode{}, p.syntaxError("Can't have quoted identifier as function name.")
+			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function name.", token)
 		}
 		return node, nil
 	case tStar:
@@ -349,10 +357,10 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		expression, err := p.parseExpression(bindingPowers[tExpref])
 		return ASTNode{nodeType: ASTExpRef, children: []ASTNode{expression}}, err
 	case tEOF:
-		return ASTNode{}, SyntaxError{msg: "Incomplete expression", Expression: p.expression, Offset: token.position}
+		return ASTNode{}, p.syntaxErrorToken("Incomplete expression", token)
 	}
 
-	return ASTNode{}, p.syntaxError("Invalid token")
+	return ASTNode{}, p.syntaxErrorToken("Invalid token: "+token.tokenType.String(), token)
 }
 
 func (p *Parser) parseMultiSelectList() (ASTNode, error) {
@@ -530,5 +538,16 @@ func (p *Parser) syntaxError(msg string) SyntaxError {
 		msg:        msg,
 		Expression: p.expression,
 		Offset:     p.lookaheadToken(0).position,
+	}
+}
+
+// Create a SyntaxError based on the provided token.
+// This differs from syntaxError() which creates a SyntaxError
+// based on the current lookahead token.
+func (p *Parser) syntaxErrorToken(msg string, t token) SyntaxError {
+	return SyntaxError{
+		msg:        msg,
+		Expression: p.expression,
+		Offset:     t.position,
 	}
 }

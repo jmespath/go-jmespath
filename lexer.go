@@ -38,7 +38,11 @@ type SyntaxError struct {
 func (e SyntaxError) Error() string {
 	// In the future, it would be good to underline the specific
 	// location where the error occurred.
-	return e.msg
+	return "SyntaxError: " + e.msg
+}
+
+func (e SyntaxError) HighlightLocation() string {
+	return e.Expression + "\n" + strings.Repeat(" ", e.Offset) + "^"
 }
 
 //go:generate stringer -type=tokType
@@ -221,7 +225,7 @@ func (lexer *Lexer) consumeUntil(end rune) (string, error) {
 	if lexer.lastWidth == 0 {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
-		return "", &SyntaxError{
+		return "", SyntaxError{
 			msg:        "Unclosed delimiter: " + string(end),
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
@@ -262,7 +266,7 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	if lexer.lastWidth == 0 {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
-		return token{}, &SyntaxError{
+		return token{}, SyntaxError{
 			msg:        "Unclosed delimiter: '",
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
@@ -286,7 +290,7 @@ func (lexer *Lexer) syntaxError(msg string) SyntaxError {
 	return SyntaxError{
 		msg:        msg,
 		Expression: lexer.expression,
-		Offset:     lexer.currentPos,
+		Offset:     lexer.currentPos - 1,
 	}
 }
 
