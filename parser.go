@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type astNodeType int
@@ -41,13 +42,32 @@ type ASTNode struct {
 }
 
 func (node ASTNode) String() string {
-	var value string
-	if node.value == nil {
-		value = "<nil>"
-	} else {
-		value = fmt.Sprintf("%s", node.value)
+	return node.PrettyPrint(0)
+}
+
+func (node ASTNode) PrettyPrint(indent int) string {
+	spaces := strings.Repeat(" ", indent)
+	output := fmt.Sprintf("%s%s {\n", spaces, node.nodeType)
+	nextIndent := indent + 2
+	if node.value != nil {
+		if converted, ok := node.value.(fmt.Stringer); ok {
+			// Account for things like comparator nodes
+			// that are enums with a String() method.
+			output += fmt.Sprintf("%svalue: %s\n", strings.Repeat(" ", nextIndent), converted.String())
+		} else {
+			output += fmt.Sprintf("%svalue: %#v\n", strings.Repeat(" ", nextIndent), node.value)
+		}
 	}
-	return fmt.Sprintf("ASTNode{type: %s val:%s children:%s}", node.nodeType, value, node.children)
+	lastIndex := len(node.children)
+	if lastIndex > 0 {
+		output += fmt.Sprintf("%schildren: {\n", strings.Repeat(" ", nextIndent))
+		childIndent := nextIndent + 2
+		for _, elem := range node.children {
+			output += elem.PrettyPrint(childIndent)
+		}
+	}
+	output += fmt.Sprintf("%s}\n", spaces)
+	return output
 }
 
 var bindingPowers = map[tokType]int{

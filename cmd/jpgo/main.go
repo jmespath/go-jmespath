@@ -27,7 +27,6 @@ import (
 	"encoding/json"
 
 	"github.com/jmespath/go-jmespath"
-	"github.com/kr/pretty"
 )
 
 func errMsg(msg string, a ...interface{}) int {
@@ -59,8 +58,8 @@ func run() int {
 		return errMsg("%s", err)
 	}
 	if *astOnly {
-		pretty.Print(parsed)
 		fmt.Println("")
+		fmt.Printf("%s\n", parsed)
 		return 0
 	}
 
