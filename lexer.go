@@ -225,7 +225,7 @@ func (lexer *Lexer) consumeUntil(end rune) (string, error) {
 	if lexer.lastWidth == 0 {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
-		return "", &SyntaxError{
+		return "", SyntaxError{
 			msg:        "Unclosed delimiter: " + string(end),
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
@@ -266,7 +266,7 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	if lexer.lastWidth == 0 {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
-		return token{}, &SyntaxError{
+		return token{}, SyntaxError{
 			msg:        "Unclosed delimiter: '",
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
