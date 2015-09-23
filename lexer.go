@@ -41,6 +41,9 @@ func (e SyntaxError) Error() string {
 	return "SyntaxError: " + e.msg
 }
 
+// HighlightLocation will show where the syntax error occurred.
+// It will place a "^" character on a line below the expression
+// at the point where the syntax error occurred.
 func (e SyntaxError) HighlightLocation() string {
 	return e.Expression + "\n" + strings.Repeat(" ", e.Offset) + "^"
 }

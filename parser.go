@@ -45,6 +45,11 @@ func (node ASTNode) String() string {
 	return node.PrettyPrint(0)
 }
 
+// PrettyPrint will pretty print the parsed AST.
+// The AST is an implementation detail and this pretty print
+// function is provided as a convenience method to help with
+// debugging.  You should not rely on its output as the internal
+// structure of the AST may change at any time.
 func (node ASTNode) PrettyPrint(indent int) string {
 	spaces := strings.Repeat(" ", indent)
 	output := fmt.Sprintf("%s%s {\n", spaces, node.nodeType)
