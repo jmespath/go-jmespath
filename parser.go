@@ -394,7 +394,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case tNot:
 		expression, err := p.parseExpression(bindingPowers[tNot])
 		if err != nil {
-			return ASTNode{}, nil
+			return ASTNode{}, err
 		}
 		return ASTNode{nodeType: ASTNotExpression, children: []ASTNode{expression}}, nil
 	case tLparen:
