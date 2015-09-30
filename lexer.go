@@ -78,6 +78,8 @@ const (
 	tStringLiteral
 	tCurrent
 	tExpref
+	tAnd
+	tNot
 	tEOF
 )
 
@@ -92,7 +94,6 @@ var basicTokens = map[rune]tokType{
 	'(': tLparen,
 	')': tRparen,
 	'@': tCurrent,
-	'&': tExpref,
 }
 
 // Bit mask for [a-zA-Z_] shifted down 64 bits to fit in a single uint64.
@@ -194,10 +195,13 @@ loop:
 			t := lexer.matchOrElse(r, '=', tGTE, tGT)
 			tokens = append(tokens, t)
 		} else if r == '!' {
-			t := lexer.matchOrElse(r, '=', tNE, tUnknown)
+			t := lexer.matchOrElse(r, '=', tNE, tNot)
 			tokens = append(tokens, t)
 		} else if r == '=' {
 			t := lexer.matchOrElse(r, '=', tEQ, tUnknown)
+			tokens = append(tokens, t)
+		} else if r == '&' {
+			t := lexer.matchOrElse(r, '&', tAnd, tExpref)
 			tokens = append(tokens, t)
 		} else if r == eof {
 			break loop

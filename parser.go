@@ -27,6 +27,8 @@ const (
 	ASTMultiSelectHash
 	ASTMultiSelectList
 	ASTOrExpression
+	ASTAndExpression
+	ASTNotExpression
 	ASTPipe
 	ASTProjection
 	ASTSubexpression
@@ -88,17 +90,19 @@ var bindingPowers = map[tokType]int{
 	tExpref:             0,
 	tColon:              0,
 	tPipe:               1,
-	tEQ:                 2,
-	tLT:                 2,
-	tLTE:                2,
-	tGT:                 2,
-	tGTE:                2,
-	tNE:                 2,
-	tOr:                 5,
-	tFlatten:            6,
+	tOr:                 2,
+	tAnd:                3,
+	tEQ:                 5,
+	tLT:                 5,
+	tLTE:                5,
+	tGT:                 5,
+	tGTE:                5,
+	tNE:                 5,
+	tFlatten:            9,
 	tStar:               20,
 	tFilter:             21,
 	tDot:                40,
+	tNot:                45,
 	tLbrace:             50,
 	tLbracket:           55,
 	tLparen:             60,
@@ -235,6 +239,9 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 	case tOr:
 		right, err := p.parseExpression(bindingPowers[tOr])
 		return ASTNode{nodeType: ASTOrExpression, children: []ASTNode{node, right}}, err
+	case tAnd:
+		right, err := p.parseExpression(bindingPowers[tAnd])
+		return ASTNode{nodeType: ASTAndExpression, children: []ASTNode{node, right}}, err
 	case tLparen:
 		name := node.value
 		var args []ASTNode
@@ -380,7 +387,25 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		return ASTNode{nodeType: ASTCurrentNode}, nil
 	case tExpref:
 		expression, err := p.parseExpression(bindingPowers[tExpref])
-		return ASTNode{nodeType: ASTExpRef, children: []ASTNode{expression}}, err
+		if err != nil {
+			return ASTNode{}, nil
+		}
+		return ASTNode{nodeType: ASTExpRef, children: []ASTNode{expression}}, nil
+	case tNot:
+		expression, err := p.parseExpression(bindingPowers[tNot])
+		if err != nil {
+			return ASTNode{}, nil
+		}
+		return ASTNode{nodeType: ASTNotExpression, children: []ASTNode{expression}}, nil
+	case tLparen:
+		expression, err := p.parseExpression(0)
+		if err != nil {
+			return ASTNode{}, err
+		}
+		if err := p.match(tRparen); err != nil {
+			return ASTNode{}, err
+		}
+		return expression, nil
 	case tEOF:
 		return ASTNode{}, p.syntaxErrorToken("Incomplete expression", token)
 	}
