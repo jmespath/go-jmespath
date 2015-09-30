@@ -85,6 +85,10 @@
         "error": "syntax"
       },
       {
+        "expression": "((&",
+        "error": "syntax"
+      },
+      {
         "expression": "a[",
         "error": "syntax"
       },
