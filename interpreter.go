@@ -111,28 +111,22 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTFlatten:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
-		}
-		if left == nil {
 			return nil, nil
 		}
-		if reflect.TypeOf(left).Kind() != reflect.Slice {
-			// Can't flatten a non slice object.
+		sliceType, ok := left.([]interface{})
+		if !ok {
+			// If we can't type convert to []interface{}, there's
+			// a chance this could still work via reflection if we're
+			// dealing with user provided types.
+			if isSliceType(left) {
+				return intr.flattenWithReflection(left)
+			}
 			return nil, nil
 		}
-		v := reflect.ValueOf(left)
 		flattened := make([]interface{}, 0, 0)
-		for i := 0; i < v.Len(); i++ {
-			element := v.Index(i).Interface()
-			if reflect.TypeOf(element).Kind() == reflect.Slice {
-				// Then insert the contents of the element
-				// slice into the flattened slice,
-				// i.e flattened = append(flattened, mySlice...)
-				elementV := reflect.ValueOf(element)
-				for j := 0; j < elementV.Len(); j++ {
-					flattened = append(
-						flattened, elementV.Index(j).Interface())
-				}
+		for _, element := range sliceType {
+			if elementSlice, ok := element.([]interface{}); ok {
+				flattened = append(flattened, elementSlice...)
 			} else {
 				flattened = append(flattened, element)
 			}
@@ -324,4 +318,25 @@ func (intr *treeInterpreter) fieldFromStruct(key string, value interface{}) (int
 		return v.Interface(), nil
 	}
 	return nil, nil
+}
+
+func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface{}, error) {
+	v := reflect.ValueOf(value)
+	flattened := make([]interface{}, 0, 0)
+	for i := 0; i < v.Len(); i++ {
+		element := v.Index(i).Interface()
+		if reflect.TypeOf(element).Kind() == reflect.Slice {
+			// Then insert the contents of the element
+			// slice into the flattened slice,
+			// i.e flattened = append(flattened, mySlice...)
+			elementV := reflect.ValueOf(element)
+			for j := 0; j < elementV.Len(); j++ {
+				flattened = append(
+					flattened, elementV.Index(j).Interface())
+			}
+		} else {
+			flattened = append(flattened, element)
+		}
+	}
+	return flattened, nil
 }
