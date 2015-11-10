@@ -51,6 +51,16 @@ func TestIsFalseWithNilInterface(t *testing.T) {
 	assert.True(isFalse(nilInterface))
 }
 
+func TestIsFalseWithMapOfUserStructs(t *testing.T) {
+	assert := assert.New(t)
+	type foo struct {
+		Bar string
+		Baz string
+	}
+	m := make(map[int]foo)
+	assert.True(isFalse(m))
+}
+
 func TestObjsEqual(t *testing.T) {
 	assert := assert.New(t)
 	assert.True(objsEqual("foo", "foo"))

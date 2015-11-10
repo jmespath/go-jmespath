@@ -30,7 +30,7 @@ func isFalse(value interface{}) bool {
 		// A struct type will never be false, even if
 		// all of its values are the zero type.
 		return false
-	} else if vType == reflect.Slice {
+	} else if vType == reflect.Slice || vType == reflect.Map {
 		if v.Len() == 0 {
 			return true
 		}
