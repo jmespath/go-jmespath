@@ -71,6 +71,22 @@ func TestCanSupportStructWithSliceAll(t *testing.T) {
 	assert.Equal([]interface{}{"f1", "correct"}, result)
 }
 
+func TestCanSupportStructWithSlicingExpression(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
+	result, err := Search("B[:].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1", "correct"}, result)
+}
+
+func TestCanSupportStructWithFilterProjection(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
+	result, err := Search("B[? `true` ].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1", "correct"}, result)
+}
+
 func TestCanSupportStructWithSlice(t *testing.T) {
 	assert := assert.New(t)
 	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}

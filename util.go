@@ -11,6 +11,13 @@ import (
 // - The boolean value false.
 // - nil
 func isFalse(value interface{}) bool {
+	/*
+		TODO:  you might be able to do:
+		       needed for all the user defined structs.
+		zeroValue := reflect.Zero(reflect.ValueOf(value).Type())
+		return zeroValue.Interface() == value
+	*/
+
 	switch v := value.(type) {
 	case bool:
 		return !v
@@ -157,4 +164,11 @@ func toArrayStr(data interface{}) ([]string, bool) {
 		return result, true
 	}
 	return nil, false
+}
+
+func isSliceType(v interface{}) bool {
+	if v == nil {
+		return false
+	}
+	return reflect.TypeOf(v).Kind() == reflect.Slice
 }
