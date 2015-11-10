@@ -88,6 +88,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		sliceType, ok := left.([]interface{})
 		if !ok {
+			if isSliceType(left) {
+				return intr.filterProjectionWithReflection(node, left)
+			}
 			return nil, nil
 		}
 		compareNode := node.children[2]
@@ -259,6 +262,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTSlice:
 		sliceType, ok := value.([]interface{})
 		if !ok {
+			if isSliceType(value) {
+				return intr.sliceWithReflection(node, value)
+			}
 			return nil, nil
 		}
 		parts := node.value.([]*int)
@@ -339,4 +345,45 @@ func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface
 		}
 	}
 	return flattened, nil
+}
+
+func (intr *treeInterpreter) sliceWithReflection(node ASTNode, value interface{}) (interface{}, error) {
+	v := reflect.ValueOf(value)
+	parts := node.value.([]*int)
+	sliceParams := make([]sliceParam, 3)
+	for i, part := range parts {
+		if part != nil {
+			sliceParams[i].Specified = true
+			sliceParams[i].N = *part
+		}
+	}
+	final := make([]interface{}, 0, 0)
+	for i := 0; i < v.Len(); i++ {
+		element := v.Index(i).Interface()
+		final = append(final, element)
+	}
+	return slice(final, sliceParams)
+}
+
+func (intr *treeInterpreter) filterProjectionWithReflection(node ASTNode, value interface{}) (interface{}, error) {
+	compareNode := node.children[2]
+	collected := make([]interface{}, 0, 0)
+	v := reflect.ValueOf(value)
+	for i := 0; i < v.Len(); i++ {
+		element := v.Index(i).Interface()
+		result, err := intr.Execute(compareNode, element)
+		if err != nil {
+			return nil, err
+		}
+		if !isFalse(result) {
+			current, err := intr.Execute(node.children[1], element)
+			if err != nil {
+				return nil, err
+			}
+			if current != nil {
+				collected = append(collected, current)
+			}
+		}
+	}
+	return collected, nil
 }
