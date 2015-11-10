@@ -63,12 +63,44 @@ func TestCanSupportUserDefinedStructsRef(t *testing.T) {
 	assert.Equal("one", result)
 }
 
+func TestCanSupportStructWithSliceAll(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
+	result, err := Search("B[].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1", "correct"}, result)
+}
+
+func TestCanSupportStructWithSlicingExpression(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
+	result, err := Search("B[:].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1", "correct"}, result)
+}
+
+func TestCanSupportStructWithFilterProjection(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
+	result, err := Search("B[? `true` ].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1", "correct"}, result)
+}
+
 func TestCanSupportStructWithSlice(t *testing.T) {
 	assert := assert.New(t)
 	data := sliceType{A: "foo", B: []scalars{scalars{"f1", "b1"}, scalars{"correct", "b2"}}}
 	result, err := Search("B[-1].Foo", data)
 	assert.Nil(err)
 	assert.Equal("correct", result)
+}
+
+func TestCanSupportStructWithOrExpressions(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", C: nil}
+	result, err := Search("C || A", data)
+	assert.Nil(err)
+	assert.Equal("foo", result)
 }
 
 func TestCanSupportStructWithSlicePointer(t *testing.T) {
@@ -96,6 +128,14 @@ func TestCanSupportStructWithSliceLowerCased(t *testing.T) {
 	result, err := Search("b[-1].foo", data)
 	assert.Nil(err)
 	assert.Equal("correct", result)
+}
+
+func TestCanSupportStructWithNestedPointers(t *testing.T) {
+	assert := assert.New(t)
+	data := struct{ A *struct{ B int } }{}
+	result, err := Search("A.B", data)
+	assert.Nil(err)
+	assert.Nil(result)
 }
 
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
