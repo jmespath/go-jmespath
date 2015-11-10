@@ -19,7 +19,7 @@ func TestSlicePositiveStep(t *testing.T) {
 	assert.Equal(input[:3], result)
 }
 
-func TestIsFalse(t *testing.T) {
+func TestIsFalseJSONTypes(t *testing.T) {
 	assert := assert.New(t)
 	assert.True(isFalse(false))
 	assert.True(isFalse(""))
@@ -28,6 +28,20 @@ func TestIsFalse(t *testing.T) {
 	m := make(map[string]interface{})
 	assert.True(isFalse(m))
 	assert.True(isFalse(nil))
+
+}
+
+func TestIsFalseWithUserDefinedStructs(t *testing.T) {
+	assert := assert.New(t)
+	type nilStructType struct {
+		SliceOfPointers []*string
+	}
+	nilStruct := nilStructType{SliceOfPointers: nil}
+	assert.True(isFalse(nilStruct.SliceOfPointers))
+
+	// A user defined struct will never be false though,
+	// even if it's fields are the zero type.
+	assert.False(isFalse(nilStruct))
 }
 
 func TestObjsEqual(t *testing.T) {

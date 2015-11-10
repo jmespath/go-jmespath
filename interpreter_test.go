@@ -95,6 +95,14 @@ func TestCanSupportStructWithSlice(t *testing.T) {
 	assert.Equal("correct", result)
 }
 
+func TestCanSupportStructWithOrExpressions(t *testing.T) {
+	assert := assert.New(t)
+	data := sliceType{A: "foo", C: nil}
+	result, err := Search("C || A", data)
+	assert.Nil(err)
+	assert.Equal("foo", result)
+}
+
 func TestCanSupportStructWithSlicePointer(t *testing.T) {
 	assert := assert.New(t)
 	data := sliceType{A: "foo", C: []*scalars{&scalars{"f1", "b1"}, &scalars{"correct", "b2"}}}
