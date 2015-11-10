@@ -24,24 +24,21 @@ func isFalse(value interface{}) bool {
 		return true
 	}
 	// Try the reflection cases before returning false.
-	v := reflect.ValueOf(value)
-	vType := v.Type().Kind()
-	if vType == reflect.Struct {
+	rv := reflect.ValueOf(value)
+	switch rv.Kind() {
+	case reflect.Struct:
 		// A struct type will never be false, even if
 		// all of its values are the zero type.
 		return false
-	} else if vType == reflect.Slice || vType == reflect.Map {
-		if v.Len() == 0 {
-			return true
-		}
-		return false
-	} else if vType == reflect.Ptr {
-		if v.IsNil() {
+	case reflect.Slice, reflect.Map:
+		return rv.Len() == 0
+	case reflect.Ptr:
+		if rv.IsNil() {
 			return true
 		}
 		// If it's a pointer type, we'll try to deref the pointer
 		// and evaluate the pointer value for isFalse.
-		element := v.Elem()
+		element := rv.Elem()
 		return isFalse(element.Interface())
 	}
 	return false
