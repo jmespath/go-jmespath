@@ -111,17 +111,28 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTFlatten:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
+			return nil, err
+		}
+		if left == nil {
 			return nil, nil
 		}
-		sliceType, ok := left.([]interface{})
-		if !ok {
+		if reflect.TypeOf(left).Kind() != reflect.Slice {
 			// Can't flatten a non slice object.
 			return nil, nil
 		}
+		v := reflect.ValueOf(left)
 		flattened := make([]interface{}, 0, 0)
-		for _, element := range sliceType {
-			if elementSlice, ok := element.([]interface{}); ok {
-				flattened = append(flattened, elementSlice...)
+		for i := 0; i < v.Len(); i++ {
+			element := v.Index(i).Interface()
+			if reflect.TypeOf(element).Kind() == reflect.Slice {
+				// Then insert the contents of the element
+				// slice into the flattened slice,
+				// i.e flattened = append(flattened, mySlice...)
+				elementV := reflect.ValueOf(element)
+				for j := 0; j < elementV.Len(); j++ {
+					flattened = append(
+						flattened, elementV.Index(j).Interface())
+				}
 			} else {
 				flattened = append(flattened, element)
 			}
