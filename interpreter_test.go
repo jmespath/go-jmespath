@@ -130,6 +130,14 @@ func TestCanSupportStructWithSliceLowerCased(t *testing.T) {
 	assert.Equal("correct", result)
 }
 
+func TestCanSupportStructWithNestedPointers(t *testing.T) {
+	assert := assert.New(t)
+	data := struct{ A *struct{ B int } }{}
+	result, err := Search("A.B", data)
+	assert.Nil(err)
+	assert.Nil(result)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	intr := newInterpreter()
 	parser := NewParser()

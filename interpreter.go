@@ -316,6 +316,9 @@ func (intr *treeInterpreter) fieldFromStruct(key string, value interface{}) (int
 		return v.Interface(), nil
 	} else if rv.Kind() == reflect.Ptr {
 		// Handle multiple levels of indirection?
+		if rv.IsNil() {
+			return nil, nil
+		}
 		rv = rv.Elem()
 		v := rv.FieldByName(fieldName)
 		if !v.IsValid() {
