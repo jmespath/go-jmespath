@@ -38,6 +38,10 @@ type nestedC struct {
 	Fooasdfasdfasdfasdf string
 }
 
+type nestedSlice struct {
+	A []sliceType
+}
+
 func TestCanSupportEmptyInterface(t *testing.T) {
 	assert := assert.New(t)
 	data := make(map[string]interface{})
@@ -136,6 +140,17 @@ func TestCanSupportStructWithNestedPointers(t *testing.T) {
 	result, err := Search("A.B", data)
 	assert.Nil(err)
 	assert.Nil(result)
+}
+
+func TestCanSupportFlattenNestedSlice(t *testing.T) {
+	assert := assert.New(t)
+	data := nestedSlice{A: []sliceType{
+		{B: []scalars{{Foo: "f1a"}, {Foo: "f1b"}}},
+		{B: []scalars{{Foo: "f2a"}, {Foo: "f2b"}}},
+	}}
+	result, err := Search("A[].B[].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"f1a", "f1b", "f2a", "f2b"}, result)
 }
 
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {

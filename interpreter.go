@@ -130,6 +130,13 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, element := range sliceType {
 			if elementSlice, ok := element.([]interface{}); ok {
 				flattened = append(flattened, elementSlice...)
+			} else if isSliceType(element) {
+				reflectFlat := make([]interface{}, 0, 0)
+				v := reflect.ValueOf(element)
+				for i := 0; i < v.Len(); i++ {
+					reflectFlat = append(reflectFlat, v.Index(i).Interface())
+				}
+				flattened = append(flattened, reflectFlat...)
 			} else {
 				flattened = append(flattened, element)
 			}
