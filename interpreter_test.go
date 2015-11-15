@@ -153,6 +153,16 @@ func TestCanSupportFlattenNestedSlice(t *testing.T) {
 	assert.Equal([]interface{}{"f1a", "f1b", "f2a", "f2b"}, result)
 }
 
+func TestCanSupportProjectionsWithStructs(t *testing.T) {
+	assert := assert.New(t)
+	data := nestedSlice{A: []sliceType{
+		{A: "first"}, {A: "second"}, {A: "third"},
+	}}
+	result, err := Search("A[*].A", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"first", "second", "third"}, result)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	intr := newInterpreter()
 	parser := NewParser()
