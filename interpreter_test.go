@@ -153,6 +153,16 @@ func TestCanSupportFlattenNestedSlice(t *testing.T) {
 	assert.Equal([]interface{}{"f1a", "f1b", "f2a", "f2b"}, result)
 }
 
+func TestCanSupportFlattenNestedEmptySlice(t *testing.T) {
+	assert := assert.New(t)
+	data := nestedSlice{A: []sliceType{
+		{}, {B: []scalars{{Foo: "a"}}},
+	}}
+	result, err := Search("A[].B[].Foo", data)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"a"}, result)
+}
+
 func TestCanSupportProjectionsWithStructs(t *testing.T) {
 	assert := assert.New(t)
 	data := nestedSlice{A: []sliceType{
