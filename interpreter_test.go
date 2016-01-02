@@ -21,6 +21,7 @@ type sliceType struct {
 	A string
 	B []scalars
 	C []*scalars
+	D []*pointerScalars
 }
 
 type benchmarkStruct struct {
@@ -130,7 +131,20 @@ func TestCanSupportStructWithPointerScalars(t *testing.T) {
 	assert.Equal("foo", result)
 	result, err = Search("Bar", data)
 	assert.Nil(err)
-	assert.Equal(124, result)
+	assert.Equal(int64(124), result)
+}
+
+func TestCanSupportStructRefWithPointerScalars(t *testing.T) {
+	assert := assert.New(t)
+	foo := "foo"
+	bar := int64(124)
+	data := sliceType{D: []*pointerScalars{&pointerScalars{Foo: &foo, Bar: &bar}}}
+	result, err := Search("D[0].Foo", data)
+	assert.Nil(err)
+	assert.Equal("foo", result)
+	result, err = Search("D[0].Bar", data)
+	assert.Nil(err)
+	assert.Equal(int64(124), result)
 }
 
 func TestWillAutomaticallyCapitalizeFieldNames(t *testing.T) {
