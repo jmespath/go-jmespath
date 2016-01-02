@@ -12,6 +12,11 @@ type scalars struct {
 	Bar string
 }
 
+type pointerScalars struct {
+	Foo *string
+	Bar *int64
+}
+
 type sliceType struct {
 	A string
 	B []scalars
@@ -113,6 +118,19 @@ func TestCanSupportStructWithSlicePointer(t *testing.T) {
 	result, err := Search("C[-1].Foo", data)
 	assert.Nil(err)
 	assert.Equal("correct", result)
+}
+
+func TestCanSupportStructWithPointerScalars(t *testing.T) {
+	assert := assert.New(t)
+	foo := "foo"
+	bar := int64(124)
+	data := pointerScalars{Foo: &foo, Bar: &bar}
+	result, err := Search("Foo", data)
+	assert.Nil(err)
+	assert.Equal("foo", result)
+	result, err = Search("Bar", data)
+	assert.Nil(err)
+	assert.Equal(124, result)
 }
 
 func TestWillAutomaticallyCapitalizeFieldNames(t *testing.T) {
