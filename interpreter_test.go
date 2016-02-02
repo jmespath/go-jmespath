@@ -173,6 +173,14 @@ func TestCanSupportProjectionsWithStructs(t *testing.T) {
 	assert.Equal([]interface{}{"first", "second", "third"}, result)
 }
 
+func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
+	assert := assert.New(t)
+	data := []scalars{scalars{"a1", "b1"}, scalars{"a2", "b2"}}
+	result, err := Search("length(@)", data)
+	assert.Nil(err)
+	assert.Equal(result.(float64), 2.0)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	intr := newInterpreter()
 	parser := NewParser()
