@@ -1,7 +1,6 @@
 package jmespath
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,14 +71,4 @@ func TestObjsEqual(t *testing.T) {
 	assert.True(!objsEqual(nil, "foo"))
 	assert.True(objsEqual([]int{}, []int{}))
 	assert.True(!objsEqual([]int{}, nil))
-}
-
-func TestStripPtrs(t *testing.T) {
-	assert := assert.New(t)
-	v1 := interface{}(1.0)
-	v2 := &v1
-	v3 := &v2
-	rv, err := stripPtrs(reflect.ValueOf(v3))
-	assert.Nil(err)
-	assert.Equal(rv.Float(), 1.0)
 }
