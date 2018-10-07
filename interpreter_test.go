@@ -181,6 +181,20 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 	assert.Equal(result.(float64), 2.0)
 }
 
+func TestYAMLObjects(t *testing.T) {
+	assert := assert.New(t)
+
+	data := map[interface{}]interface{}{
+		"db": map[interface{}]interface{}{
+			"user": "app",
+			"name": "test-db",
+		},
+	}
+	result, err := Search("db.name", data)
+	assert.Nil(err)
+	assert.Equal("test-db", result)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	intr := newInterpreter()
 	parser := NewParser()
