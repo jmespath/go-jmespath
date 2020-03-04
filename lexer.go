@@ -241,6 +241,10 @@ func (lexer *Lexer) consumeUntil(end rune) (string, error) {
 	return lexer.expression[start : lexer.currentPos-lexer.lastWidth], nil
 }
 
+func (lexer *Lexer) isJSON(value string) bool {
+	return json.Valid([]byte(value))
+}
+
 func (lexer *Lexer) consumeLiteral() (token, error) {
 	start := lexer.currentPos
 	value, err := lexer.consumeUntil('`')
@@ -248,8 +252,16 @@ func (lexer *Lexer) consumeLiteral() (token, error) {
 		return token{}, err
 	}
 	value = strings.Replace(value, "\\`", "`", -1)
+	if lexer.isJSON(value) {
+		return token{
+			tokenType: tJSONLiteral,
+			value:     value,
+			position:  start,
+			length:    len(value),
+		}, nil
+	}
 	return token{
-		tokenType: tJSONLiteral,
+		tokenType: tStringLiteral,
 		value:     value,
 		position:  start,
 		length:    len(value),

@@ -1,0 +1,54 @@
+[{
+    "given": {
+        "Users": [{
+                "UserName": "testuser-50",
+                "Path": "/",
+                "CreateDate": "2013-02-12T19:08:52Z",
+                "UserId": "EXAMPLEUSERID",
+                "Arn": "arn:aws:iam::12345:user/testuser1"
+            },
+            {
+                "UserName": "testuser-51",
+                "Path": "/",
+                "CreateDate": "2012-10-14T23:53:39Z",
+                "UserId": "EXAMPLEUSERID",
+                "Arn": "arn:aws:iam::123456:user/testuser2"
+            }
+        ]
+    },
+    "cases": [{
+            "comment": "all users",
+            "expression": "Users[]",
+            "result": [{
+                    "UserName": "testuser-50",
+                    "Path": "/",
+                    "CreateDate": "2013-02-12T19:08:52Z",
+                    "UserId": "EXAMPLEUSERID",
+                    "Arn": "arn:aws:iam::12345:user/testuser1"
+                },
+                {
+                    "UserName": "testuser-51",
+                    "Path": "/",
+                    "CreateDate": "2012-10-14T23:53:39Z",
+                    "UserId": "EXAMPLEUSERID",
+                    "Arn": "arn:aws:iam::123456:user/testuser2"
+                }
+            ]
+        },
+        {
+            "comment": "users username",
+            "expression": "Users[*].UserName",
+            "result": ["testuser-50", "testuser-51"]
+        },
+        {
+            "comment": "zero",
+            "expression": "`0`",
+            "result": 0
+        },
+        {
+            "comment": "specific user",
+            "expression": "Users[?UserName==`testuser-51`].UserName",
+            "result": ["testuser-51"]
+        }
+    ]
+}]

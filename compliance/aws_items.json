@@ -1,0 +1,54 @@
+[{
+    "given": {
+        "Items": [{
+            "Id": "0lby2sr150",
+            "Name": "ExampleAPI",
+            "Description": "Example API",
+            "CreatedDate": 1582562487,
+            "ApiKeySource": "HEADER",
+            "EndpointConfiguration": {
+                "Types": [
+                    "REGIONAL"
+                ]
+            }
+        }]
+    },
+    "cases": [{
+            "comment": "all items",
+            "expression": "Items[]",
+            "result": [{
+                "Id": "0lby2sr150",
+                "Name": "ExampleAPI",
+                "Description": "Example API",
+                "CreatedDate": 1582562487,
+                "ApiKeySource": "HEADER",
+                "EndpointConfiguration": {
+                    "Types": [
+                        "REGIONAL"
+                    ]
+                }
+            }]
+        },
+        {
+            "comment": "query by name",
+            "expression": "Items[?Name==`ExampleAPI`]",
+            "result": [{
+                "Id": "0lby2sr150",
+                "Name": "ExampleAPI",
+                "Description": "Example API",
+                "CreatedDate": 1582562487,
+                "ApiKeySource": "HEADER",
+                "EndpointConfiguration": {
+                    "Types": [
+                        "REGIONAL"
+                    ]
+                }
+            }]
+        },
+        {
+            "comment": "query by name - Id",
+            "expression": "Items[?Name==`ExampleAPI`].Id",
+            "result": ["0lby2sr150"]
+        }
+    ]
+}]
