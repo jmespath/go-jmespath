@@ -1,7 +1,5 @@
 language: go
 
-sudo: required
-
 os:
     - linux
     - osx
