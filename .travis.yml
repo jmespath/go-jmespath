@@ -17,3 +17,4 @@ go:
 install: go get -v -t ./...
 
 script: make test
+
