@@ -1,8 +1,8 @@
 language: go
 
 os:
-    - linux
-    - osx
+  - linux
+  - osx
 
 go:
   - 1.11.x
@@ -11,11 +11,6 @@ go:
   - 1.14.x
   - tip
 
-  matrix:
-    allow_failures:
-        - go: tip
-
 install: go get -v -t ./...
 
 script: make test
-
