@@ -1,10 +1,22 @@
 package jmespath
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestValidUncompiledExpressionSearches(t *testing.T) {
+	assert := assert.New(t)
+	var j = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`)
+	var d interface{}
+	err := json.Unmarshal(j, &d)
+	assert.Nil(err)
+	result, err := Search("foo.bar.baz[2]", d)
+	assert.Nil(err)
+	assert.Equal(2.0, result)
+}
 
 func TestValidPrecompiledExpressionSearches(t *testing.T) {
 	assert := assert.New(t)
