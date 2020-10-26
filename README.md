@@ -10,7 +10,7 @@ document and transform it into another JSON document
 through a JMESPath expression.
 
 Using go-jmespath is really easy.  There's a single function
-you use, `jmespath.search`:
+you use, `jmespath.Search`:
 
 
 ```go
@@ -35,7 +35,7 @@ from a list.  Here are a few more examples:
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo.bar", data)
+> result, err := jmespath.Search("foo.bar", data)
 result = { "baz": [ 0, 1, 2, 3, 4 ] }
 
 
@@ -43,7 +43,7 @@ result = { "baz": [ 0, 1, 2, 3, 4 ] }
                            {"first": "c", "last": "d"}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search({"foo[*].first", data)
+> result, err := jmespath.Search({"foo[*].first", data)
 result [ 'a', 'c' ]
 
 
@@ -52,7 +52,7 @@ result [ 'a', 'c' ]
                            {"age": 40}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo[?age > `30`]")
+> result, err := jmespath.Search("foo[?age > `30`]")
 result = [ { age: 35 }, { age: 40 } ]
 ```
 
