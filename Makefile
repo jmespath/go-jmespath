@@ -19,8 +19,9 @@ build:
 	rm -f cmd/$(CMD)/$(CMD) && cd cmd/$(CMD)/ && go build ./...
 	mv cmd/$(CMD)/$(CMD) .
 
-test: test-internal-testify
-	echo "making tests ${SRC_PKGS}"
+test: test-internal-testify test-prod
+
+test-prod:
 	go test -v ${SRC_PKGS}
 
 check:
