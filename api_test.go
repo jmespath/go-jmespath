@@ -2,6 +2,7 @@ package jmespath
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/jmespath/go-jmespath/internal/testify/assert"
@@ -41,4 +42,26 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 		assert.NotNil(t, r)
 	}()
 	MustCompile("not a valid expression")
+}
+
+func TestCustomFunction(t *testing.T) {
+	assert := assert.New(t)
+	data := make(map[string]interface{})
+	data["foo"] = "BAR"
+	precompiled, err := Compile("to_lower(foo)")
+	precompiled.Register(&FunctionEntry{
+		Name: "to_lower",
+		Arguments: []ArgSpec{
+			{Types: []JpType{JpString}},
+		},
+		Handler: func (arguments []interface{}) (interface{}, error) {
+			s := arguments[0].(string)
+			return strings.ToLower(s), nil
+		},
+	})
+
+	assert.Nil(err)
+	result, err := precompiled.Search(data)
+	assert.Nil(err)
+	assert.Equal("bar", result)
 }

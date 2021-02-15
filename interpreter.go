@@ -120,7 +120,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if !ok {
 			// If we can't type convert to []interface{}, there's
 			// a chance this could still work via reflection if we're
-			// dealing with user provided types.
+			// dealing with user provided Types.
 			if isSliceType(left) {
 				return intr.flattenWithReflection(left)
 			}

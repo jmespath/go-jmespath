@@ -333,7 +333,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case tQuotedIdentifier:
 		node := ASTNode{nodeType: ASTField, value: token.value}
 		if p.current() == tLparen {
-			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function name.", token)
+			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function Name.", token)
 		}
 		return node, nil
 	case tStar:
