@@ -766,7 +766,7 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
 	sep := arguments[0].(string)
-	// We can't just do Arguments[1].([]string), we have to
+	// We can't just do arguments[1].([]string), we have to
 	// manually convert each item to a string.
 	arrayStr := []string{}
 	for _, item := range arguments[1].([]interface{}) {
