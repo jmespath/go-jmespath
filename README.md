@@ -1,5 +1,7 @@
 # go-jmespath - A JMESPath implementation in Go
 
+**NOTE: This is a fork of [go-jmespath](https://github.com/jmespath/go-jmespath) with custom function support. See issue [#29](https://github.com/jmespath/go-jmespath/issues/29).**
+
 [![Build Status](https://img.shields.io/travis/jmespath/go-jmespath.svg)](https://travis-ci.org/jmespath/go-jmespath)
 
 
@@ -70,6 +72,36 @@ you are going to run multiple searches with it:
     > result, err := precompiled.Search(data)
 	result = "bar"
 ```
+
+## Adding Custom Functions
+
+Adding custom functions is only supported for compiled patterns. See [test case](https://github.com/kyverno/go-jmespath/blob/master/api_test.go#L47) as an example:
+
+```golang
+func TestCustomFunction(t *testing.T) {
+	assert := assert.New(t)
+	data := make(map[string]interface{})
+	data["foo"] = "BAR"
+	precompiled, err := Compile("to_lower(foo)")
+	precompiled.Register(&FunctionEntry{
+		Name: "to_lower",
+		Arguments: []ArgSpec{
+			{Types: []JpType{JpString}},
+		},
+		Handler: func (arguments []interface{}) (interface{}, error) {
+			s := arguments[0].(string)
+			return strings.ToLower(s), nil
+		},
+	})
+
+	assert.Nil(err)
+	result, err := precompiled.Search(data)
+	assert.Nil(err)
+	assert.Equal("bar", result)
+}
+
+```
+
 
 ## More Resources
 
