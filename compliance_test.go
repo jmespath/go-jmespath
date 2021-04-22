@@ -69,6 +69,177 @@ func TestCompliance(t *testing.T) {
 	}
 }
 
+func TestOrOperatorHandlesErrorPath(t *testing.T) {
+	expression := "outer.bad || outer.foo"
+	givenRaw := []byte(`{
+		"outer": {
+		  "foo": "foo",
+		  "bar": "bar",
+		  "baz": "baz"
+		}
+	}`)
+
+	var given interface{}
+	err := json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	actual, err := Search(expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, actual.(string), "foo")
+}
+
+func TestFilterInsideThePathHandlesErrorInPath(t *testing.T) {
+	expression := "foo[?a==`1`].b.c"
+	givenRaw := []byte(`{
+		"foo": [
+			{"a": 1, "b": {"c": "x"}},
+			{"a": 1, "b": {"c": "y"}},
+			{"a": 1, "b": {"c": "z"}},
+			{"a": 2, "b": {"c": "z"}},
+			{"a": 1, "baz": 2}
+		]
+	}`)
+
+	expectedRaw := []byte(`["x", "y", "z"]`)
+
+	var given, expected interface{}
+	var err error
+
+	err = json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(expectedRaw, &expected)
+	assert.Nil(t, err)
+
+	actual, err := Search(expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, actual, expected)
+}
+
+func TestUnaryNotFilterInsideThePathHandlesErrorInPath(t *testing.T) {
+	expression := "foo[?!key]"
+	givenRaw := []byte(`{
+		"foo": [
+		  {"key": true},
+		  {"key": false},
+		  {"key": []},
+		  {"key": {}},
+		  {"key": [0]},
+		  {"key": {"a": "b"}},
+		  {"key": 0},
+		  {"key": 1},
+		  {"key": null},
+		  {"notkey": true}
+		]
+	  }`)
+
+	expectedRaw := []byte(`[{"key": false}, {"key": []}, {"key": {}}, {"key": null}, {"notkey": true} ]`)
+
+	var given, expected interface{}
+	var err error
+
+	err = json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(expectedRaw, &expected)
+	assert.Nil(t, err)
+
+	actual, err := Search(expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, actual, expected)
+}
+
+func TestEqualityWithNullRHS_MustHandleError(t *testing.T) {
+	expression := "foo[?key == `null`]"
+	givenRaw := []byte(`{
+		"foo": [
+		  {"key": true},
+		  {"key": false},
+		  {"key": []},
+		  {"key": {}},
+		  {"key": [0]},
+		  {"key": {"a": "b"}},
+		  {"key": 0},
+		  {"key": 1},
+		  {"key": null},
+		  {"notkey": true}
+		]
+	  }`)
+
+	expectedRaw := []byte(`[ {"key": null}, {"notkey": true} ]`)
+
+	var given, expected interface{}
+	var err error
+
+	err = json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(expectedRaw, &expected)
+	assert.Nil(t, err)
+
+	actual, err := Search(expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, actual, expected)
+}
+
+func TestMapFunction_MustHandleError(t *testing.T) {
+	expression := "map(&c, people)"
+	givenRaw := []byte(`{
+		"people": [
+			 {"a": 10, "b": 1, "c": "z"},
+			 {"a": 10, "b": 2, "c": null},
+			 {"a": 10, "b": 3},
+			 {"a": 10, "b": 4, "c": "z"},
+			 {"a": 10, "b": 5, "c": null},
+			 {"a": 10, "b": 6},
+			 {"a": 10, "b": 7, "c": "z"},
+			 {"a": 10, "b": 8, "c": null},
+			 {"a": 10, "b": 9}
+		],
+		"empty": []
+	  }`)
+
+	expectedRaw := []byte(`["z", null, null, "z", null, null, "z", null, null]`)
+
+	var given, expected interface{}
+	var err error
+
+	err = json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(expectedRaw, &expected)
+	assert.Nil(t, err)
+
+	actual, err := Search(expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, actual, expected)
+}
+
 func runComplianceTest(assert *assert.Assertions, filename string) {
 	var testSuites []TestSuite
 	data, err := ioutil.ReadFile(filename)
@@ -117,6 +288,11 @@ func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase
 		return
 	}
 	actual, err := Search(testcase.Expression, given)
+	if _, ok := err.(NotFoundError); ok {
+		err = nil
+		actual = nil
+	}
+
 	if assert.Nil(err, fmt.Sprintf("Expression: %s", testcase.Expression)) {
 		assert.Equal(testcase.Result, actual, fmt.Sprintf("Expression: %s", testcase.Expression))
 	}
