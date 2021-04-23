@@ -2,6 +2,7 @@ package jmespath
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"unicode"
 	"unicode/utf8"
@@ -10,6 +11,15 @@ import (
 /* This is a tree based interpreter.  It walks the AST and directly
    interprets the AST to search through a JSON document.
 */
+
+// NotFoundError is returned when it is impossible to resolve the AstField
+type NotFoundError struct {
+	key string
+}
+
+func (n NotFoundError) Error() string {
+	return fmt.Sprintf("Unknown key \"%s\" in path", n.key)
+}
 
 type treeInterpreter struct {
 	fCall *functionCaller
@@ -33,11 +43,15 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTComparator:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		right, err := intr.Execute(node.children[1], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		switch node.value {
 		case tEQ:
@@ -70,7 +84,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, arg := range node.children {
 			current, err := intr.Execute(arg, value)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
@@ -78,7 +94,11 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTField:
 		if m, ok := value.(map[string]interface{}); ok {
 			key := node.value.(string)
-			return m[key], nil
+			if val, ok := m[key]; ok {
+				return val, nil
+			} else {
+				return nil, NotFoundError{key}
+			}
 		}
 		return intr.fieldFromStruct(node.value.(string), value)
 	case ASTFilterProjection:
@@ -98,12 +118,16 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, element := range sliceType {
 			result, err := intr.Execute(compareNode, element)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			if !isFalse(result) {
 				current, err := intr.Execute(node.children[1], element)
 				if err != nil {
-					return nil, err
+					if _, ok := err.(NotFoundError); !ok {
+						return nil, err
+					}
 				}
 				if current != nil {
 					collected = append(collected, current)
@@ -180,7 +204,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, child := range node.children {
 			current, err := intr.Execute(child, value)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			key := child.value.(string)
 			collected[key] = current
@@ -194,7 +220,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, child := range node.children {
 			current, err := intr.Execute(child, value)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			collected = append(collected, current)
 		}
@@ -202,19 +230,29 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTOrExpression:
 		matched, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); ok {
+				matched = nil
+			} else {
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
+			}
 		}
 		if isFalse(matched) {
 			matched, err = intr.Execute(node.children[1], value)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 		}
 		return matched, nil
 	case ASTAndExpression:
 		matched, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		if isFalse(matched) {
 			return matched, nil
@@ -223,7 +261,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTNotExpression:
 		matched, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		if isFalse(matched) {
 			return true, nil
@@ -235,14 +275,18 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, child := range node.children {
 			result, err = intr.Execute(child, result)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 		}
 		return result, nil
 	case ASTProjection:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		sliceType, ok := left.([]interface{})
 		if !ok {
@@ -256,7 +300,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, element := range sliceType {
 			current, err = intr.Execute(node.children[1], element)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			if current != nil {
 				collected = append(collected, current)
@@ -266,7 +312,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTSubexpression, ASTIndexExpression:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		return intr.Execute(node.children[1], left)
 	case ASTSlice:
@@ -303,7 +351,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, element := range values {
 			current, err := intr.Execute(node.children[1], element)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			if current != nil {
 				collected = append(collected, current)
@@ -386,12 +436,16 @@ func (intr *treeInterpreter) filterProjectionWithReflection(node ASTNode, value 
 		element := v.Index(i).Interface()
 		result, err := intr.Execute(compareNode, element)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		if !isFalse(result) {
 			current, err := intr.Execute(node.children[1], element)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			if current != nil {
 				collected = append(collected, current)
@@ -408,7 +462,9 @@ func (intr *treeInterpreter) projectWithReflection(node ASTNode, value interface
 		element := v.Index(i).Interface()
 		result, err := intr.Execute(node.children[1], element)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		if result != nil {
 			collected = append(collected, result)

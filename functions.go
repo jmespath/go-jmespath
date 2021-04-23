@@ -476,7 +476,9 @@ func jpfMap(arguments []interface{}) (interface{}, error) {
 	for _, value := range arr {
 		current, err := intr.Execute(node, value)
 		if err != nil {
-			return nil, err
+			if _, ok := err.(NotFoundError); !ok {
+				return nil, err
+			}
 		}
 		mapped = append(mapped, current)
 	}
@@ -536,7 +538,9 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 	}
 	start, err := intr.Execute(node, arr[0])
 	if err != nil {
-		return nil, err
+		if _, ok := err.(NotFoundError); !ok {
+			return nil, err
+		}
 	}
 	switch t := start.(type) {
 	case float64:
@@ -545,7 +549,9 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			current, ok := result.(float64)
 			if !ok {
@@ -563,7 +569,9 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			current, ok := result.(string)
 			if !ok {
@@ -632,7 +640,9 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 	}
 	start, err := intr.Execute(node, arr[0])
 	if err != nil {
-		return nil, err
+		if _, ok := err.(NotFoundError); !ok {
+			return nil, err
+		}
 	}
 	if t, ok := start.(float64); ok {
 		bestVal := t
@@ -640,7 +650,9 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			current, ok := result.(float64)
 			if !ok {
@@ -658,7 +670,9 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		for _, item := range arr[1:] {
 			result, err := intr.Execute(node, item)
 			if err != nil {
-				return nil, err
+				if _, ok := err.(NotFoundError); !ok {
+					return nil, err
+				}
 			}
 			current, ok := result.(string)
 			if !ok {
@@ -744,7 +758,9 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 	}
 	start, err := intr.Execute(node, arr[0])
 	if err != nil {
-		return nil, err
+		if _, ok := err.(NotFoundError); !ok {
+			return nil, err
+		}
 	}
 	if _, ok := start.(float64); ok {
 		sortable := &byExprFloat{intr, node, arr, false}
@@ -802,7 +818,9 @@ func jpfToString(arguments []interface{}) (interface{}, error) {
 	}
 	result, err := json.Marshal(arguments[0])
 	if err != nil {
-		return nil, err
+		if _, ok := err.(NotFoundError); !ok {
+			return nil, err
+		}
 	}
 	return string(result), nil
 }
