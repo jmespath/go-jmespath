@@ -93,6 +93,47 @@ func TestOrOperatorHandlesErrorPath(t *testing.T) {
 	assert.Equal(t, actual.(string), "foo")
 }
 
+func TestInvalidPathMustReturnError(t *testing.T) {
+	expression := "outer.bad"
+	givenRaw := []byte(`{
+		"outer": {
+		  "foo": "foo",
+		  "bar": "bar",
+		  "baz": "baz"
+		}
+	}`)
+
+	var given interface{}
+	var err error
+
+	err = json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	_, err = Search(expression, given)
+	assert.Error(t, err)
+
+	_, ok := err.(NotFoundError)
+	assert.True(t, ok)
+}
+
+func TestNullValueMustBeReturned(t *testing.T) {
+	expression := "outer.foo"
+	givenRaw := []byte(`{
+		"outer": {
+		  "foo": null
+		}
+	}`)
+
+	var given interface{}
+
+	err := json.Unmarshal(givenRaw, &given)
+	assert.Nil(t, err)
+
+	result, err := Search(expression, given)
+	assert.Nil(t, err)
+	assert.Nil(t, result)
+}
+
 func TestFilterInsideThePathHandlesErrorInPath(t *testing.T) {
 	expression := "foo[?a==`1`].b.c"
 	givenRaw := []byte(`{
