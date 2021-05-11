@@ -312,9 +312,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 	case ASTSubexpression, ASTIndexExpression:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
-			if _, ok := err.(NotFoundError); !ok {
-				return nil, err
-			}
+			return nil, err
 		}
 		return intr.Execute(node.children[1], left)
 	case ASTSlice:
