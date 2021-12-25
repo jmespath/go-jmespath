@@ -128,6 +128,18 @@
       "result": false
     },
     {
+      "expression": "matches('This and these', 't(his|h[eo]se)')",
+      "result": true
+    },
+    {
+      "expression": "matches('Those people', 't(his|h[eo]se)')",
+      "result": false
+    },
+    {
+      "expression": "matches('THOSE people', '(?i)t(his|h[eo]se)')",
+      "result": true
+    },
+    {
       "expression": "ends_with(str, 'r')",
       "result": true
     },

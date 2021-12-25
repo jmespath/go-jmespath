@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -168,6 +169,14 @@ func newFunctionCaller() *functionCaller {
 				{types: []jpType{jpAny}},
 			},
 			handler: jpfContains,
+		},
+		"matches": {
+			name: "matches",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+			},
+			handler: jpfMatches,
 		},
 		"ends_with": {
 			name: "ends_with",
@@ -457,6 +466,15 @@ func jpfContains(arguments []interface{}) (interface{}, error) {
 		}
 	}
 	return false, nil
+}
+func jpfMatches(arguments []interface{}) (interface{}, error) {
+	search := arguments[0].(string)
+	rgexp := arguments[1].(string)
+	r, err := regexp.Compile(rgexp)
+	if err != nil {
+		return false, err
+	}
+	return r.MatchString(search), nil
 }
 func jpfEndsWith(arguments []interface{}) (interface{}, error) {
 	search := arguments[0].(string)
