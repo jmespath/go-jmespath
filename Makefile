@@ -25,6 +25,7 @@ test: build
 check:
 	go vet ${SRC_PKGS}
 	golint ${SRC_PKGS}
+	golangci-lint run
 
 htmlc:
 	go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
@@ -44,3 +45,4 @@ pprof-cpu:
 install-dev-cmds:
 	go install golang.org/x/lint/golint@latest
 	go install golang.org/x/tools/cmd/stringer@latest
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
