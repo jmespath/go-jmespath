@@ -129,8 +129,12 @@ func BenchmarkParseDeepProjection104(b *testing.B) {
 }
 
 func runParseBenchmark(b *testing.B, expression string) {
+	assert := assert.New(b)
 	parser := NewParser()
 	for i := 0; i < b.N; i++ {
-		parser.Parse(expression)
+		_, err := parser.Parse(expression)
+		if err != nil {
+			assert.Fail("Failed to parse expression")
+		}
 	}
 }

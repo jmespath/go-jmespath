@@ -47,8 +47,7 @@ func TestIsFalseWithUserDefinedStructs(t *testing.T) {
 func TestIsFalseWithNilInterface(t *testing.T) {
 	assert := assert.New(t)
 	var a *int
-	var nilInterface interface{}
-	nilInterface = a
+	var nilInterface interface{} = a
 	assert.True(isFalse(nilInterface))
 }
 

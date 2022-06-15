@@ -45,4 +45,4 @@ pprof-cpu:
 install-dev-cmds:
 	go install golang.org/x/lint/golint@latest
 	go install golang.org/x/tools/cmd/stringer@latest
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.46.2
+	command -v golangci-lint || { curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.46.2; }

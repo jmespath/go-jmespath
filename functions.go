@@ -17,7 +17,6 @@ type jpFunction func(arguments []interface{}) (interface{}, error)
 type jpType string
 
 const (
-	jpUnknown     jpType = "unknown"
 	jpNumber      jpType = "number"
 	jpString      jpType = "string"
 	jpArray       jpType = "array"
@@ -445,7 +444,7 @@ func jpfContains(arguments []interface{}) (interface{}, error) {
 	el := arguments[1]
 	if searchStr, ok := search.(string); ok {
 		if elStr, ok := el.(string); ok {
-			return strings.Index(searchStr, elStr) != -1, nil
+			return strings.Contains(searchStr, elStr), nil
 		}
 		return false, nil
 	}
