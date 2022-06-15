@@ -341,7 +341,7 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 		return arguments, nil
 	}
 	if len(arguments) < len(e.arguments) {
-		return nil, errors.New("Invalid arity.")
+		return nil, errors.New("invalid arity")
 	}
 	return arguments, nil
 }
