@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version:
+          - 1.18
+          - 1.17
+          - 1.16
+          - 1.15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Install deps 
+        run: go mod download
+      - name: Tests
+        run: make test
+#  The latest golint version has lint errors that need to be
+#  fixed before this is turned on.
+#      - name: Install golint
+#        if: ${{ matrix.go-version == '1.17' }}
+#        run: |
+#          go install golang.org/x/lint/golint@latest
+#          make check

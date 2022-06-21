@@ -19,8 +19,7 @@ build:
 	rm -f cmd/$(CMD)/$(CMD) && cd cmd/$(CMD)/ && go build ./...
 	mv cmd/$(CMD)/$(CMD) .
 
-test: test-internal-testify
-	echo "making tests ${SRC_PKGS}"
+test: build
 	go test -v ${SRC_PKGS}
 
 check:
@@ -46,6 +45,5 @@ bench:
 pprof-cpu:
 	go tool pprof ./go-jmespath.test ./cpu.out
 
-test-internal-testify:
-	cd internal/testify && go test ./...
-
+install-golint:
+	go install golang.org/x/lint/golint@latest
