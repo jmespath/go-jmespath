@@ -78,7 +78,9 @@ func run() int {
 		}
 	}
 	var data interface{}
-	json.Unmarshal(inputData, &data)
+	if err := json.Unmarshal(inputData, &data); err != nil {
+		return errMsg("Invalid input JSON: %s", err)
+	}
 	result, err := jmespath.Search(expression, data)
 	if err != nil {
 		return errMsg("Error executing expression: %s", err)

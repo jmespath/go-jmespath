@@ -182,16 +182,21 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 }
 
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
+	assert := assert.New(b)
 	intr := newInterpreter()
 	parser := NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf")
 	data := benchmarkStruct{"foobarbazqux"}
 	for i := 0; i < b.N; i++ {
-		intr.Execute(ast, &data)
+		_, err := intr.Execute(ast, data)
+		if err != nil {
+			assert.Fail("Received error from interpreter")
+		}
 	}
 }
 
 func BenchmarkInterpretNestedStruct(b *testing.B) {
+	assert := assert.New(b)
 	intr := newInterpreter()
 	parser := NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
@@ -203,19 +208,27 @@ func BenchmarkInterpretNestedStruct(b *testing.B) {
 		},
 	}
 	for i := 0; i < b.N; i++ {
-		intr.Execute(ast, &data)
+		_, err := intr.Execute(ast, data)
+		if err != nil {
+			assert.Fail("Received error from interpreter")
+		}
 	}
 }
 
 func BenchmarkInterpretNestedMaps(b *testing.B) {
+	assert := assert.New(b)
 	jsonData := []byte(`{"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": "foobarbazqux"}}}}`)
 	var data interface{}
-	json.Unmarshal(jsonData, &data)
+	err := json.Unmarshal(jsonData, &data)
+	assert.Nil(err)
 
 	intr := newInterpreter()
 	parser := NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	for i := 0; i < b.N; i++ {
-		intr.Execute(ast, data)
+		_, err := intr.Execute(ast, data)
+		if err != nil {
+			assert.Fail("Received error from interpreter")
+		}
 	}
 }

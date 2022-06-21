@@ -154,8 +154,12 @@ func BenchmarkLexDeepProjection104(b *testing.B) {
 }
 
 func runLexBenchmark(b *testing.B, expression string) {
+	assert := assert.New(b)
 	lexer := NewLexer()
 	for i := 0; i < b.N; i++ {
-		lexer.tokenize(expression)
+		_, err := lexer.tokenize(expression)
+		if err != nil {
+			assert.Fail("Could not lex expression")
+		}
 	}
 }
