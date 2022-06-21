@@ -21,7 +21,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install deps 
-        run: go get -d ./...
+        run: go mod download
       - name: Tests
         run: make test
 #  The latest golint version has lint errors that need to be
