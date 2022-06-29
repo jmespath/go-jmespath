@@ -10,7 +10,7 @@ document and transform it into another JSON document
 through a JMESPath expression.
 
 Using go-jmespath is really easy.  There's a single function
-you use, `jmespath.search`:
+you use, `jmespath.Search`:
 
 
 ```go
@@ -23,9 +23,9 @@ you use, `jmespath.search`:
 result = 2
 ```
 
-In the example we gave the ``search`` function input data of
+In the example we gave the ``Search`` function input data of
 `{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}` as well as the JMESPath
-expression `foo.bar.baz[2]`, and the `search` function evaluated
+expression `foo.bar.baz[2]`, and the `Search` function evaluated
 the expression against the input data to produce the result ``2``.
 
 The JMESPath language can do a lot more than select an element
@@ -35,7 +35,7 @@ from a list.  Here are a few more examples:
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo.bar", data)
+> result, err := jmespath.Search("foo.bar", data)
 result = { "baz": [ 0, 1, 2, 3, 4 ] }
 
 
@@ -43,7 +43,7 @@ result = { "baz": [ 0, 1, 2, 3, 4 ] }
                            {"first": "c", "last": "d"}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search({"foo[*].first", data)
+> result, err := jmespath.Search({"foo[*].first", data)
 result [ 'a', 'c' ]
 
 
@@ -52,7 +52,7 @@ result [ 'a', 'c' ]
                            {"age": 40}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo[?age > `30`]")
+> result, err := jmespath.Search("foo[?age > `30`]", data)
 result = [ { age: 35 }, { age: 40 } ]
 ```
 
