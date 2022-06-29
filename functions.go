@@ -318,6 +318,14 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfNotNull,
 		},
+		"del": {
+			name: "del",
+			arguments: []argSpec{
+				{types: []jpType{jpObject}},
+				{types: []jpType{jpString}, variadic: true},
+			},
+			handler: jpfDel,
+		},
 	}
 	return caller
 }
@@ -481,6 +489,16 @@ func jpfMap(arguments []interface{}) (interface{}, error) {
 	}
 	return mapped, nil
 }
+
+func jpfDel(arguments []interface{}) (interface{}, error) {
+	obj := arguments[0].(map[string]interface{})
+	for i := 1; i < len(arguments); i++ {
+		key := arguments[i].(string)
+		delete(obj, key)
+	}
+	return obj, nil
+}
+
 func jpfMax(arguments []interface{}) (interface{}, error) {
 	if items, ok := toArrayNum(arguments[0]); ok {
 		if len(items) == 0 {
