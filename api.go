@@ -48,6 +48,6 @@ func Search(expression string, data interface{}) (interface{}, error) {
 	return intr.Execute(ast, data)
 }
 
-func (jp *JMESPath) Register(f *FunctionEntry) {
-	jp.intr.fCall.functionTable[f.Name] = *f
+func (jp *JMESPath) Register(f FunctionEntry) {
+	jp.intr.fCall.functionTable[f.Name] = f
 }

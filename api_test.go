@@ -49,17 +49,16 @@ func TestCustomFunction(t *testing.T) {
 	data := make(map[string]interface{})
 	data["foo"] = "BAR"
 	precompiled, err := Compile("to_lower(foo)")
-	precompiled.Register(&FunctionEntry{
+	precompiled.Register(FunctionEntry{
 		Name: "to_lower",
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpString}},
 		},
-		Handler: func (arguments []interface{}) (interface{}, error) {
+		Handler: func(arguments []interface{}) (interface{}, error) {
 			s := arguments[0].(string)
 			return strings.ToLower(s), nil
 		},
 	})
-
 	assert.Nil(err)
 	result, err := precompiled.Search(data)
 	assert.Nil(err)
