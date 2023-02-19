@@ -29,6 +29,18 @@ var lexingTests = []struct {
 	{"-20", []token{{tNumber, "-20", 0, 3}}},
 	{"foo", []token{{tUnquotedIdentifier, "foo", 0, 3}}},
 	{`"bar"`, []token{{tQuotedIdentifier, "bar", 0, 3}}},
+	// Arithmetic operators
+	{"+", []token{{tPlus, "+", 0, 1}}},
+	{"/", []token{{tDivide, "/", 0, 1}}},
+	{"\u2212", []token{{tMinus, "\u2212", 0, 1}}},
+	{"\u00d7", []token{{tMultiply, "\u00d7", 0, 1}}},
+	{"\u00f7", []token{{tDivide, "\u00f7", 0, 1}}},
+	{"%", []token{{tModulo, "%", 0, 1}}},
+	{"//", []token{{tDiv, "//", 0, 2}}},
+	{"- 20", []token{
+		{tMinus, "-", 0, 1},
+		{tNumber, "20", 2, 2},
+	}},
 	// Escaping the delimiter
 	{`"bar\"baz"`, []token{{tQuotedIdentifier, `bar"baz`, 0, 7}}},
 	{",", []token{{tComma, ",", 0, 1}}},

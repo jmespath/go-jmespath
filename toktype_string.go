@@ -26,24 +26,30 @@ func _() {
 	_ = x[tQuotedIdentifier-15]
 	_ = x[tComma-16]
 	_ = x[tColon-17]
-	_ = x[tLT-18]
-	_ = x[tLTE-19]
-	_ = x[tGT-20]
-	_ = x[tGTE-21]
-	_ = x[tEQ-22]
-	_ = x[tNE-23]
-	_ = x[tJSONLiteral-24]
-	_ = x[tStringLiteral-25]
-	_ = x[tCurrent-26]
-	_ = x[tExpref-27]
-	_ = x[tAnd-28]
-	_ = x[tNot-29]
-	_ = x[tEOF-30]
+	_ = x[tPlus-18]
+	_ = x[tMinus-19]
+	_ = x[tMultiply-20]
+	_ = x[tDivide-21]
+	_ = x[tModulo-22]
+	_ = x[tDiv-23]
+	_ = x[tLT-24]
+	_ = x[tLTE-25]
+	_ = x[tGT-26]
+	_ = x[tGTE-27]
+	_ = x[tEQ-28]
+	_ = x[tNE-29]
+	_ = x[tJSONLiteral-30]
+	_ = x[tStringLiteral-31]
+	_ = x[tCurrent-32]
+	_ = x[tExpref-33]
+	_ = x[tAnd-34]
+	_ = x[tNot-35]
+	_ = x[tEOF-36]
 }
 
-const _tokType_name = "tUnknowntStartDottFiltertFlattentLparentRparentLbrackettRbrackettLbracetRbracetOrtPipetNumbertUnquotedIdentifiertQuotedIdentifiertCommatColontLTtLTEtGTtGTEtEQtNEtJSONLiteraltStringLiteraltCurrenttExpreftAndtNottEOF"
+const _tokType_name = "tUnknowntStartDottFiltertFlattentLparentRparentLbrackettRbrackettLbracetRbracetOrtPipetNumbertUnquotedIdentifiertQuotedIdentifiertCommatColontPlustMinustMultiplytDividetModulotDivtLTtLTEtGTtGTEtEQtNEtJSONLiteraltStringLiteraltCurrenttExpreftAndtNottEOF"
 
-var _tokType_index = [...]uint8{0, 8, 13, 17, 24, 32, 39, 46, 55, 64, 71, 78, 81, 86, 93, 112, 129, 135, 141, 144, 148, 151, 155, 158, 161, 173, 187, 195, 202, 206, 210, 214}
+var _tokType_index = [...]uint8{0, 8, 13, 17, 24, 32, 39, 46, 55, 64, 71, 78, 81, 86, 93, 112, 129, 135, 141, 146, 152, 161, 168, 175, 179, 182, 186, 189, 193, 196, 199, 211, 225, 233, 240, 244, 248, 252}
 
 func (i tokType) String() string {
 	if i < 0 || i >= tokType(len(_tokType_index)-1) {

@@ -68,6 +68,12 @@ const (
 	tQuotedIdentifier
 	tComma
 	tColon
+	tPlus
+	tMinus
+	tMultiply
+	tDivide
+	tModulo
+	tDiv
 	tLT
 	tLTE
 	tGT
@@ -84,16 +90,21 @@ const (
 )
 
 var basicTokens = map[rune]tokType{
-	'.': tDot,
-	'*': tStar,
-	',': tComma,
-	':': tColon,
-	'{': tLbrace,
-	'}': tRbrace,
-	']': tRbracket, // tLbracket not included because it could be "[]"
-	'(': tLparen,
-	')': tRparen,
-	'@': tCurrent,
+	'.':      tDot,
+	'*':      tStar,
+	',':      tComma,
+	':':      tColon,
+	'{':      tLbrace,
+	'}':      tRbrace,
+	']':      tRbracket, // tLbracket not included because it could be "[]"
+	'(':      tLparen,
+	')':      tRparen,
+	'@':      tCurrent,
+	'+':      tPlus,
+	'%':      tModulo,
+	'\u2212': tMinus,
+	'\u00d7': tMultiply,
+	'\u00f7': tDivide,
 }
 
 // Bit mask for [a-zA-Z_] shifted down 64 bits to fit in a single uint64.
@@ -161,8 +172,25 @@ loop:
 				length:    1,
 			}
 			tokens = append(tokens, t)
-		} else if r == '-' || (r >= '0' && r <= '9') {
+		} else if r == '-' {
+			p := lexer.peek()
+			if p >= '0' && p <= '9' {
+				t := lexer.consumeNumber()
+				tokens = append(tokens, t)
+			} else {
+				t := token{
+					tokenType: tMinus,
+					value:     string(r),
+					position:  lexer.currentPos - lexer.lastWidth,
+					length:    1,
+				}
+				tokens = append(tokens, t)
+			}
+		} else if r >= '0' && r <= '9' {
 			t := lexer.consumeNumber()
+			tokens = append(tokens, t)
+		} else if r == '/' {
+			t := lexer.matchOrElse(r, '/', tDiv, tDivide)
 			tokens = append(tokens, t)
 		} else if r == '[' {
 			t := lexer.consumeLBracket()
