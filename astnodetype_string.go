@@ -9,33 +9,35 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[ASTEmpty-0]
-	_ = x[ASTComparator-1]
-	_ = x[ASTCurrentNode-2]
-	_ = x[ASTExpRef-3]
-	_ = x[ASTFunctionExpression-4]
-	_ = x[ASTField-5]
-	_ = x[ASTFilterProjection-6]
-	_ = x[ASTFlatten-7]
-	_ = x[ASTIdentity-8]
-	_ = x[ASTIndex-9]
-	_ = x[ASTIndexExpression-10]
-	_ = x[ASTKeyValPair-11]
-	_ = x[ASTLiteral-12]
-	_ = x[ASTMultiSelectHash-13]
-	_ = x[ASTMultiSelectList-14]
-	_ = x[ASTOrExpression-15]
-	_ = x[ASTAndExpression-16]
-	_ = x[ASTNotExpression-17]
-	_ = x[ASTPipe-18]
-	_ = x[ASTProjection-19]
-	_ = x[ASTSubexpression-20]
-	_ = x[ASTSlice-21]
-	_ = x[ASTValueProjection-22]
+	_ = x[ASTArithmeticExpression-1]
+	_ = x[ASTArithmeticUnaryExpression-2]
+	_ = x[ASTComparator-3]
+	_ = x[ASTCurrentNode-4]
+	_ = x[ASTExpRef-5]
+	_ = x[ASTFunctionExpression-6]
+	_ = x[ASTField-7]
+	_ = x[ASTFilterProjection-8]
+	_ = x[ASTFlatten-9]
+	_ = x[ASTIdentity-10]
+	_ = x[ASTIndex-11]
+	_ = x[ASTIndexExpression-12]
+	_ = x[ASTKeyValPair-13]
+	_ = x[ASTLiteral-14]
+	_ = x[ASTMultiSelectHash-15]
+	_ = x[ASTMultiSelectList-16]
+	_ = x[ASTOrExpression-17]
+	_ = x[ASTAndExpression-18]
+	_ = x[ASTNotExpression-19]
+	_ = x[ASTPipe-20]
+	_ = x[ASTProjection-21]
+	_ = x[ASTSubexpression-22]
+	_ = x[ASTSlice-23]
+	_ = x[ASTValueProjection-24]
 }
 
-const _astNodeType_name = "ASTEmptyASTComparatorASTCurrentNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjection"
+const _astNodeType_name = "ASTEmptyASTArithmeticExpressionASTArithmeticUnaryExpressionASTComparatorASTCurrentNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjection"
 
-var _astNodeType_index = [...]uint16{0, 8, 21, 35, 44, 65, 73, 92, 102, 113, 121, 139, 152, 162, 180, 198, 213, 229, 245, 252, 265, 281, 289, 307}
+var _astNodeType_index = [...]uint16{0, 8, 31, 59, 72, 86, 95, 116, 124, 143, 153, 164, 172, 190, 203, 213, 231, 249, 264, 280, 296, 303, 316, 332, 340, 358}
 
 func (i astNodeType) String() string {
 	if i < 0 || i >= astNodeType(len(_astNodeType_index)-1) {

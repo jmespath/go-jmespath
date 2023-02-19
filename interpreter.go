@@ -2,6 +2,7 @@ package jmespath
 
 import (
 	"errors"
+	"math"
 	"reflect"
 	"unicode"
 	"unicode/utf8"
@@ -30,6 +31,54 @@ type expRef struct {
 // with the ASTNode to the input data "value".
 func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface{}, error) {
 	switch node.nodeType {
+	case ASTArithmeticUnaryExpression:
+		expr, err := intr.Execute(node.children[0], value)
+		if err != nil {
+			return nil, err
+		}
+		num, ok := expr.(float64)
+		if !ok {
+			return nil, nil
+		}
+		switch node.value {
+		case tPlus:
+			return num, nil
+		case tMinus:
+			return -num, nil
+		}
+	case ASTArithmeticExpression:
+		left, err := intr.Execute(node.children[0], value)
+		if err != nil {
+			return nil, err
+		}
+		right, err := intr.Execute(node.children[1], value)
+		if err != nil {
+			return nil, err
+		}
+		leftNum, ok := left.(float64)
+		if !ok {
+			return nil, nil
+		}
+		rightNum, ok := right.(float64)
+		if !ok {
+			return nil, nil
+		}
+		switch node.value {
+		case tPlus:
+			return leftNum + rightNum, nil
+		case tMinus:
+			return leftNum - rightNum, nil
+		case tStar:
+			return leftNum * rightNum, nil
+		case tMultiply:
+			return leftNum * rightNum, nil
+		case tDivide:
+			return leftNum / rightNum, nil
+		case tModulo:
+			return math.Mod(leftNum, rightNum), nil
+		case tDiv:
+			return math.Floor(leftNum / rightNum), nil
+		}
 	case ASTComparator:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {

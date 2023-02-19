@@ -40,6 +40,7 @@ var whiteListed = []string{
 	"compliance/unicode.json",
 	"compliance/wildcard.json",
 	"compliance/boolean.json",
+	"compliance/arithmetic.json",
 }
 
 func allowed(path string) bool {

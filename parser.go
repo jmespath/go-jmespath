@@ -12,6 +12,8 @@ type astNodeType int
 //go:generate stringer -type astNodeType
 const (
 	ASTEmpty astNodeType = iota
+	ASTArithmeticExpression
+	ASTArithmeticUnaryExpression
 	ASTComparator
 	ASTCurrentNode
 	ASTExpRef
@@ -98,6 +100,12 @@ var bindingPowers = map[tokType]int{
 	tGT:                 5,
 	tGTE:                5,
 	tNE:                 5,
+	tMinus:              6,
+	tPlus:               6,
+	tDiv:                7,
+	tDivide:             7,
+	tModulo:             7,
+	tMultiply:           7,
 	tFlatten:            9,
 	tStar:               20,
 	tFilter:             21,
@@ -274,6 +282,16 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 			nodeType: ASTProjection,
 			children: []ASTNode{left, right},
 		}, err
+	case tPlus, tMinus, tStar, tMultiply, tDivide, tModulo, tDiv:
+		right, err := p.parseExpression(bindingPowers[tokenType])
+		if err != nil {
+			return ASTNode{}, err
+		}
+		return ASTNode{
+			nodeType: ASTArithmeticExpression,
+			value:    tokenType,
+			children: []ASTNode{node, right},
+		}, nil
 	case tEQ, tNE, tGT, tGTE, tLT, tLTE:
 		right, err := p.parseExpression(bindingPowers[tokenType])
 		if err != nil {
@@ -336,6 +354,12 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function name.", token)
 		}
 		return node, nil
+	case tPlus:
+		expr, err := p.parseExpression(bindingPowers[tPlus])
+		return ASTNode{nodeType: ASTArithmeticUnaryExpression, value: tPlus, children: []ASTNode{expr}}, err
+	case tMinus:
+		expr, err := p.parseExpression(bindingPowers[tMinus])
+		return ASTNode{nodeType: ASTArithmeticUnaryExpression, value: tMinus, children: []ASTNode{expr}}, err
 	case tStar:
 		left := ASTNode{nodeType: ASTIdentity}
 		var right ASTNode
