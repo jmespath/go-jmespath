@@ -60,13 +60,13 @@ type sliceParam struct {
 }
 
 // Slice supports [start:stop:step] style slicing that's supported in JMESPath.
-func slice(slice []interface{}, parts []sliceParam) ([]interface{}, error) {
+func slice[T interface{} | rune](slice []T, parts []sliceParam) ([]T, error) {
 	computed, err := computeSliceParams(len(slice), parts)
 	if err != nil {
 		return nil, err
 	}
 	start, stop, step := computed[0], computed[1], computed[2]
-	result := []interface{}{}
+	result := []T{}
 	if step > 0 {
 		for i := start; i < stop; i += step {
 			result = append(result, slice[i])
@@ -77,6 +77,17 @@ func slice(slice []interface{}, parts []sliceParam) ([]interface{}, error) {
 		}
 	}
 	return result, nil
+}
+
+func makeSliceParams(parts []*int) []sliceParam {
+	sliceParams := make([]sliceParam, 3)
+	for i, part := range parts {
+		if part != nil {
+			sliceParams[i].Specified = true
+			sliceParams[i].N = *part
+		}
+	}
+	return sliceParams
 }
 
 func computeSliceParams(length int, parts []sliceParam) ([]int, error) {

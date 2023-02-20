@@ -184,4 +184,12 @@
       "result": []
     }
   ]
+}, {
+  "given": null,
+  "cases": [
+    {
+      "expression": "'e\u0301le\u0301ment'[::-1]",
+      "result": "tnem\u0301el\u0301e"
+    }
+  ]
 }]
