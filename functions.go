@@ -37,6 +37,7 @@ type functionEntry struct {
 type argSpec struct {
 	types    []jpType
 	variadic bool
+	optional bool
 }
 
 type byExprString struct {
@@ -326,14 +327,27 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	if len(e.arguments) == 0 {
 		return arguments, nil
 	}
-	if len(arguments) < len(e.arguments) {
-		return nil, errors.New("invalid arity")
+
+	variadic := isVariadic(e.arguments)
+	minExpected := getMinExpected(e.arguments)
+	maxExpected, hasMax := getMaxExpected(e.arguments)
+	count := len(arguments)
+
+	if count < minExpected {
+		return nil, notEnoughArgumentsSupplied(e.name, count, minExpected, variadic)
 	}
+
+	if hasMax && count > maxExpected {
+		return nil, tooManyArgumentsSupplied(e.name, count, maxExpected)
+	}
+
 	for i, spec := range e.arguments {
-		userArg := arguments[i]
-		err := spec.typeCheck(userArg)
-		if err != nil {
-			return nil, err
+		if !spec.optional || i <= len(arguments)-1 {
+			userArg := arguments[i]
+			err := spec.typeCheck(userArg)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	lastIndex := len(e.arguments) - 1
@@ -346,12 +360,33 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 				return nil, err
 			}
 		}
-	} else {
-		if len(arguments) > len(e.arguments) {
-			return nil, errors.New("invalid arity")
-		}
 	}
 	return arguments, nil
+}
+
+func isVariadic(arguments []argSpec) bool {
+	for _, spec := range arguments {
+		if spec.variadic {
+			return true
+		}
+	}
+	return false
+}
+func getMinExpected(arguments []argSpec) int {
+	expected := 0
+	for _, spec := range arguments {
+		if !spec.optional {
+			expected += 1
+		}
+	}
+	return expected
+}
+func getMaxExpected(arguments []argSpec) (int, bool) {
+	if isVariadic(arguments) {
+		return 0, false
+	} else {
+		return int(len(arguments)), true
+	}
 }
 
 func (a *argSpec) typeCheck(arg interface{}) error {
