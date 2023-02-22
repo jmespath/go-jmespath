@@ -326,21 +326,30 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	if len(e.arguments) == 0 {
 		return arguments, nil
 	}
-	if !e.arguments[len(e.arguments)-1].variadic {
-		if len(e.arguments) != len(arguments) {
-			return nil, errors.New("incorrect number of args")
+	if len(arguments) < len(e.arguments) {
+		return nil, errors.New("invalid arity")
+	}
+	for i, spec := range e.arguments {
+		userArg := arguments[i]
+		err := spec.typeCheck(userArg)
+		if err != nil {
+			return nil, err
 		}
-		for i, spec := range e.arguments {
+	}
+	lastIndex := len(e.arguments) - 1
+	lastArg := e.arguments[lastIndex]
+	if lastArg.variadic {
+		for i := len(e.arguments) - 1; i < len(arguments); i++ {
 			userArg := arguments[i]
-			err := spec.typeCheck(userArg)
+			err := lastArg.typeCheck(userArg)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return arguments, nil
-	}
-	if len(arguments) < len(e.arguments) {
-		return nil, errors.New("invalid arity")
+	} else {
+		if len(arguments) > len(e.arguments) {
+			return nil, errors.New("invalid arity")
+		}
 	}
 	return arguments, nil
 }

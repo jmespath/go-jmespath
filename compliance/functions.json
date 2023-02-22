@@ -244,6 +244,10 @@
       "result": null
     },
     {
+      "expression": "merge('hello', 'world')",
+      "error": "invalid-type"
+    },
+    {
       "expression": "merge(`{}`)",
       "result": {}
     },
