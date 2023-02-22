@@ -502,16 +502,12 @@ func jpfFromItems(arguments []interface{}) (interface{}, error) {
 
 func jpfItems(arguments []interface{}) (interface{}, error) {
 	value := arguments[0].(map[string]interface{})
-	arrays := [][]interface{}{}
+	arrays := []interface{}{}
 	for key, item := range value {
 		arrays = append(arrays, []interface{}{key, item})
 	}
 
-	result := []interface{}{}
-	for _, item := range arrays {
-		result = append(result, item)
-	}
-	return result, nil
+	return arrays, nil
 }
 
 func jpfJoin(arguments []interface{}) (interface{}, error) {
