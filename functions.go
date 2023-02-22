@@ -469,23 +469,22 @@ func jpfGroupBy(arguments []interface{}) (interface{}, error) {
 	if len(arr) == 0 {
 		return nil, nil
 	}
-	groups := map[string][]interface{}{}
+	groups := map[string]interface{}{}
 	for _, element := range arr {
 		spec, err := intr.Execute(node, element)
 		if err != nil {
 			return nil, err
 		}
-		if key, ok := spec.(string); ok {
-			groups[key] = append(groups[key], element)
-		} else {
+		if key, ok := spec.(string); !ok {
 			return nil, errors.New("invalid type, the expression must evaluate to a string")
+		} else {
+			if _, ok := groups[key]; !ok {
+				groups[key] = []interface{}{}
+			}
+			groups[key] = append(groups[key].([]interface{}), element)
 		}
 	}
-	result := map[string]interface{}{}
-	for k, group := range groups {
-		result[k] = group
-	}
-	return result, nil
+	return groups, nil
 }
 
 func jpfJoin(arguments []interface{}) (interface{}, error) {
