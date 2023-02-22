@@ -168,6 +168,15 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfFloor,
 		},
+		"group_by": {
+			name: "group_by",
+			arguments: []argSpec{
+				{types: []jpType{jpArray}},
+				{types: []jpType{jpExpref}},
+			},
+			handler:   jpfGroupBy,
+			hasExpRef: true,
+		},
 		"join": {
 			name: "join",
 			arguments: []argSpec{
@@ -450,6 +459,33 @@ func jpfEndsWith(arguments []interface{}) (interface{}, error) {
 func jpfFloor(arguments []interface{}) (interface{}, error) {
 	val := arguments[0].(float64)
 	return math.Floor(val), nil
+}
+
+func jpfGroupBy(arguments []interface{}) (interface{}, error) {
+	intr := arguments[0].(*treeInterpreter)
+	arr := arguments[1].([]interface{})
+	exp := arguments[2].(expRef)
+	node := exp.ref
+	if len(arr) == 0 {
+		return nil, nil
+	}
+	groups := map[string][]interface{}{}
+	for _, element := range arr {
+		spec, err := intr.Execute(node, element)
+		if err != nil {
+			return nil, err
+		}
+		if key, ok := spec.(string); ok {
+			groups[key] = append(groups[key], element)
+		} else {
+			return nil, errors.New("invalid type, the expression must evaluate to a string")
+		}
+	}
+	result := map[string]interface{}{}
+	for k, group := range groups {
+		result[k] = group
+	}
+	return result, nil
 }
 
 func jpfJoin(arguments []interface{}) (interface{}, error) {
