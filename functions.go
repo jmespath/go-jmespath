@@ -21,6 +21,7 @@ const (
 	jpString      jpType = "string"
 	jpArray       jpType = "array"
 	jpObject      jpType = "object"
+	jpArrayArray  jpType = "array[array]"
 	jpArrayNumber jpType = "array[number]"
 	jpArrayString jpType = "array[string]"
 	jpExpref      jpType = "expref"
@@ -167,6 +168,20 @@ func newFunctionCaller() *functionCaller {
 				{types: []jpType{jpNumber}},
 			},
 			handler: jpfFloor,
+		},
+		"from_items": {
+			name: "from_items",
+			arguments: []argSpec{
+				{types: []jpType{jpArrayArray}},
+			},
+			handler: jpfFromItems,
+		},
+		"items": {
+			name: "items",
+			arguments: []argSpec{
+				{types: []jpType{jpObject}},
+			},
+			handler: jpfItems,
 		},
 		"join": {
 			name: "join",
@@ -318,6 +333,14 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfValues,
 		},
+		"zip": {
+			name: "zip",
+			arguments: []argSpec{
+				{types: []jpType{jpArray}},
+				{types: []jpType{jpArray}, variadic: true},
+			},
+			handler: jpfZip,
+		},
 	}
 	return caller
 }
@@ -363,6 +386,12 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 		case jpObject:
 			if _, ok := arg.(map[string]interface{}); ok {
 				return nil
+			}
+		case jpArrayArray:
+			if isSliceType(arg) {
+				if _, ok := arg.([]interface{}); ok {
+					return nil
+				}
 			}
 		case jpArrayNumber:
 			if _, ok := toArrayNum(arg); ok {
@@ -450,6 +479,39 @@ func jpfEndsWith(arguments []interface{}) (interface{}, error) {
 func jpfFloor(arguments []interface{}) (interface{}, error) {
 	val := arguments[0].(float64)
 	return math.Floor(val), nil
+}
+
+func jpfFromItems(arguments []interface{}) (interface{}, error) {
+	if arr, ok := toArrayArray(arguments[0]); ok {
+		result := make(map[string]interface{})
+		for _, item := range arr {
+			if len(item) != 2 {
+				return nil, errors.New("invalid value, each array must contain two elements, a pair of string and value")
+			}
+			first, ok := item[0].(string)
+			if !ok {
+				return nil, errors.New("invalid value, each array must contain two elements, a pair of string and value")
+			}
+			second := item[1]
+			result[first] = second
+		}
+		return result, nil
+	}
+	return nil, errors.New("invalid type, first argument must be an array of arrays")
+}
+
+func jpfItems(arguments []interface{}) (interface{}, error) {
+	value := arguments[0].(map[string]interface{})
+	arrays := [][]interface{}{}
+	for key, item := range value {
+		arrays = append(arrays, []interface{}{key, item})
+	}
+
+	result := []interface{}{}
+	for _, item := range arrays {
+		result = append(result, item)
+	}
+	return result, nil
 }
 
 func jpfJoin(arguments []interface{}) (interface{}, error) {
@@ -858,4 +920,29 @@ func jpfValues(arguments []interface{}) (interface{}, error) {
 		collected = append(collected, value)
 	}
 	return collected, nil
+}
+
+func jpfZip(arguments []interface{}) (interface{}, error) {
+	// determine how many items are present
+	// for each array in the result
+
+	count := int(^uint(0) >> 1)
+	for _, item := range arguments {
+		arr := item.([]interface{})
+		// TODO: use go1.18 min[T constraints.Ordered] generic function
+		count = int(math.Min(float64(count), float64(len(arr))))
+	}
+
+	result := []interface{}{}
+
+	for i := 0; i < count; i++ {
+		nth := []interface{}{}
+		for _, item := range arguments {
+			arr := item.([]interface{})
+			nth = append(nth, arr[i])
+		}
+		result = append(result, nth)
+	}
+
+	return result, nil
 }

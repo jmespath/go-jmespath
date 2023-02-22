@@ -137,6 +137,25 @@ func capSlice(length int, actual int, step int) int {
 	return actual
 }
 
+// toArrayArray converts an empty interface type to a slice of slices.
+// If any element in the array cannot be converted, then nil is returned
+// along with a second value of false.
+func toArrayArray(data interface{}) ([][]interface{}, bool) {
+	result := [][]interface{}{}
+	arr, ok := data.([]interface{})
+	if !ok {
+		return nil, false
+	}
+	for _, item := range arr {
+		nested, ok := item.([]interface{})
+		if !ok {
+			return nil, false
+		}
+		result = append(result, nested)
+	}
+	return result, true
+}
+
 // ToArrayNum converts an empty interface type to a slice of float64.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
