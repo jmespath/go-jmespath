@@ -3,7 +3,7 @@ package jmespath
 import (
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSlicePositiveStep(t *testing.T) {
