@@ -162,6 +162,26 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfEndsWith,
 		},
+		"find_first": {
+			name: "find_first",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}, optional: true},
+				{types: []jpType{jpNumber}, optional: true},
+			},
+			handler: jpfFindFirst,
+		},
+		"find_last": {
+			name: "find_last",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}, optional: true},
+				{types: []jpType{jpNumber}, optional: true},
+			},
+			handler: jpfFindLast,
+		},
 		"floor": {
 			name: "floor",
 			arguments: []argSpec{
@@ -489,6 +509,49 @@ func jpfEndsWith(arguments []interface{}) (interface{}, error) {
 	search := arguments[0].(string)
 	suffix := arguments[1].(string)
 	return strings.HasSuffix(search, suffix), nil
+}
+
+func jpfFindImpl(name string, arguments []interface{}, find func(s string, substr string) int) (interface{}, error) {
+	subject := arguments[0].(string)
+	substr := arguments[1].(string)
+
+	if len(subject) == 0 || len(substr) == 0 {
+		return nil, nil
+	}
+
+	start := 0
+	startSpecified := len(arguments) > 2
+	if startSpecified {
+		num, ok := toInteger(arguments[2])
+		if !ok {
+			return nil, notAnInteger(name, "start")
+		}
+		start = max(0, num)
+	}
+	end := len(subject)
+	endSpecified := len(arguments) > 3
+	if endSpecified {
+		num, ok := toInteger(arguments[3])
+		if !ok {
+			return nil, notAnInteger(name, "end")
+		}
+		end = min(num, len(subject))
+	}
+
+	offset := find(subject[start:end], substr)
+
+	if offset == -1 {
+		return nil, nil
+	}
+
+	return float64(start + offset), nil
+}
+
+func jpfFindFirst(arguments []interface{}) (interface{}, error) {
+	return jpfFindImpl("find_first", arguments, strings.Index)
+}
+func jpfFindLast(arguments []interface{}) (interface{}, error) {
+	return jpfFindImpl("find_last", arguments, strings.LastIndex)
 }
 
 func jpfFloor(arguments []interface{}) (interface{}, error) {

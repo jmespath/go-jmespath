@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+func notAnInteger(name string, arg string) error {
+	return errors.New(formatNotAnInteger(name, arg))
+}
 func notEnoughArgumentsSupplied(name string, count int, minExpected int, variadic bool) error {
 	return errors.New(formatNotEnoughArguments(name, count, minExpected, variadic))
 }
@@ -13,6 +16,9 @@ func tooManyArgumentsSupplied(name string, count int, maxExpected int) error {
 	return errors.New(formatTooManyArguments(name, count, maxExpected))
 }
 
+func formatNotAnInteger(name string, arg string) string {
+	return fmt.Sprintf("invalid value, the function '%s' expects its '%s' argument to be an integer.", name, arg)
+}
 func formatNotEnoughArguments(name string, count int, minExpected int, variadic bool) string {
 
 	more := ""
