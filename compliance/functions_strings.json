@@ -82,6 +82,7 @@
         "expression": "find_first('', '')",
         "result": null
       },
+
       {
         "expression": "find_last(string, 'string')",
         "result": 8
@@ -117,7 +118,10 @@
       {
         "expression": "find_last('', '')",
         "result": null
-      }
+      },
+
+      { "expression": "lower('STRING')", "result":	"string" },
+      { "expression": "upper('string')", "result":	"STRING" }
     ]
   }
 ]

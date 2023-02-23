@@ -211,6 +211,13 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfLength,
 		},
+		"lower": {
+			name: "lower",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+			},
+			handler: jpfLower,
+		},
 		"map": {
 			name: "amp",
 			arguments: []argSpec{
@@ -331,6 +338,13 @@ func newFunctionCaller() *functionCaller {
 				{types: []jpType{jpAny}},
 			},
 			handler: jpfType,
+		},
+		"upper": {
+			name: "upper",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+			},
+			handler: jpfUpper,
 		},
 		"values": {
 			name: "values",
@@ -590,6 +604,10 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 		return float64(len(c)), nil
 	}
 	return nil, errors.New("could not compute length()")
+}
+
+func jpfLower(arguments []interface{}) (interface{}, error) {
+	return strings.ToLower(arguments[0].(string)), nil
 }
 
 func jpfMap(arguments []interface{}) (interface{}, error) {
@@ -956,6 +974,10 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 		return "boolean", nil
 	}
 	return nil, errors.New("unknown type")
+}
+
+func jpfUpper(arguments []interface{}) (interface{}, error) {
+	return strings.ToUpper(arguments[0].(string)), nil
 }
 
 func jpfValues(arguments []interface{}) (interface{}, error) {
