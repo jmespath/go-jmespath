@@ -193,6 +193,10 @@ func toInteger(v interface{}) (int, bool) {
 	}
 	return 0, false
 }
+func toPositiveInteger(v interface{}) (int, bool) {
+	num, ok := toInteger(v)
+	return num, ok && num >= 0
+}
 
 func isSliceType(v interface{}) bool {
 	if v == nil {

@@ -273,6 +273,16 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfNotNull,
 		},
+		"replace": {
+			name: "replace",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}, optional: true},
+			},
+			handler: jpfReplace,
+		},
 		"reverse": {
 			name: "reverse",
 			arguments: []argSpec{
@@ -820,6 +830,22 @@ func jpfNotNull(arguments []interface{}) (interface{}, error) {
 		}
 	}
 	return nil, nil
+}
+
+func jpfReplace(arguments []interface{}) (interface{}, error) {
+	subject := arguments[0].(string)
+	old := arguments[1].(string)
+	new := arguments[2].(string)
+	count := -1
+	if len(arguments) > 3 {
+		num, ok := toPositiveInteger(arguments[3])
+		if !ok {
+			return nil, notAPositiveInteger("replace", "count")
+		}
+		count = num
+	}
+
+	return strings.Replace(subject, old, new, count), nil
 }
 
 func jpfReverse(arguments []interface{}) (interface{}, error) {

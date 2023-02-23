@@ -121,7 +121,23 @@
       },
 
       { "expression": "lower('STRING')", "result":	"string" },
-      { "expression": "upper('string')", "result":	"STRING" }
+      { "expression": "upper('string')", "result":	"STRING" },
+
+      {
+        "expression": "replace(abab, 'aa', '-', `0.333333`)",
+        "error": "invalid-value"
+      },
+
+      {
+        "expression": "replace(abab, 'aa', '-', `0.001`)",
+        "error": "invalid-value"
+      },
+
+      { "expression": "replace(abab, 'aa', '-', `0`)", "result": "aabaaabaaaab" },
+      { "expression": "replace(abab, 'aa', '-', `1`)", "result": "-baaabaaaab" },
+      { "expression": "replace(abab, 'aa', '-', `2`)", "result": "-b-abaaaab" },
+      { "expression": "replace(abab, 'aa', '-', `3`)", "result": "-b-ab-aab" },
+      { "expression": "replace(abab, 'aa', '-')", "result":	"-b-ab--b" }
     ]
   }
 ]
