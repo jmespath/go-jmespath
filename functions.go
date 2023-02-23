@@ -922,7 +922,7 @@ func jpfZip(arguments []interface{}) (interface{}, error) {
 	// determine how many items are present
 	// for each array in the result
 
-	count := int(^uint(0) >> 1)
+	count := math.MaxInt
 	for _, item := range arguments {
 		arr := item.([]interface{})
 		// TODO: use go1.18 min[T constraints.Ordered] generic function
