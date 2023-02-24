@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -341,6 +342,30 @@ func newFunctionCaller() *functionCaller {
 				{types: []jpType{jpAny}},
 			},
 			handler: jpfToString,
+		},
+		"trim": {
+			name: "trim",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}, optional: true},
+			},
+			handler: jpfTrim,
+		},
+		"trim_left": {
+			name: "trim_left",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}, optional: true},
+			},
+			handler: jpfTrimLeft,
+		},
+		"trim_right": {
+			name: "trim_right",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}, optional: true},
+			},
+			handler: jpfTrimRight,
 		},
 		"type": {
 			name: "type",
@@ -977,6 +1002,32 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 		return nil, nil
 	}
 	return nil, errors.New("unknown type")
+}
+
+func jpfTrimImpl(
+	arguments []interface{},
+	trimSpace func(s string, predicate func(r rune) bool) string,
+	trim func(s string, cutset string) string) (interface{}, error) {
+
+	s := arguments[0].(string)
+	cutset := ""
+	if len(arguments) > 1 {
+		cutset = arguments[1].(string)
+	}
+
+	if len(cutset) == 0 {
+		return trimSpace(s, unicode.IsSpace), nil
+	}
+	return trim(s, cutset), nil
+}
+func jpfTrim(arguments []interface{}) (interface{}, error) {
+	return jpfTrimImpl(arguments, strings.TrimFunc, strings.Trim)
+}
+func jpfTrimLeft(arguments []interface{}) (interface{}, error) {
+	return jpfTrimImpl(arguments, strings.TrimLeftFunc, strings.TrimLeft)
+}
+func jpfTrimRight(arguments []interface{}) (interface{}, error) {
+	return jpfTrimImpl(arguments, strings.TrimRightFunc, strings.TrimRight)
 }
 
 func jpfType(arguments []interface{}) (interface{}, error) {
