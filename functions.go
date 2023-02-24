@@ -274,6 +274,24 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfNotNull,
 		},
+		"pad_left": {
+			name: "pad_left",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}},
+				{types: []jpType{jpString}, optional: true},
+			},
+			handler: jpfPadLeft,
+		},
+		"pad_right": {
+			name: "pad_right",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}},
+				{types: []jpType{jpString}, optional: true},
+			},
+			handler: jpfPadRight,
+		},
 		"replace": {
 			name: "replace",
 			arguments: []argSpec{
@@ -855,6 +873,46 @@ func jpfNotNull(arguments []interface{}) (interface{}, error) {
 		}
 	}
 	return nil, nil
+}
+
+func jpfPadImpl(
+	name string,
+	arguments []interface{},
+	pad func(s string, width int, pad string) string) (interface{}, error) {
+
+	s := arguments[0].(string)
+	width, ok := toPositiveInteger(arguments[1])
+	if !ok {
+		return nil, notAPositiveInteger(name, "width")
+	}
+	chars := " "
+	if len(arguments) > 2 {
+		chars = arguments[2].(string)
+		if len(chars) > 1 {
+			return nil, errors.New(fmt.Sprintf("invalid value, the function '%s' expects its 'pad' argument to be a string of length 1", name))
+		}
+	}
+
+	return pad(s, width, chars), nil
+}
+
+func jpfPadLeft(arguments []interface{}) (interface{}, error) {
+	return jpfPadImpl("pad_left", arguments, padLeft)
+}
+func jpfPadRight(arguments []interface{}) (interface{}, error) {
+	return jpfPadImpl("pad_right", arguments, padRight)
+}
+func padLeft(s string, width int, pad string) string {
+	length := max(0, width-len(s))
+	padding := strings.Repeat(pad, length)
+	result := fmt.Sprintf("%s%s", padding, s)
+	return result
+}
+func padRight(s string, width int, pad string) string {
+	length := max(0, width-len(s))
+	padding := strings.Repeat(pad, length)
+	result := fmt.Sprintf("%s%s", s, padding)
+	return result
 }
 
 func jpfReplace(arguments []interface{}) (interface{}, error) {
