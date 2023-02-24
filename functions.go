@@ -325,6 +325,15 @@ func newFunctionCaller() *functionCaller {
 			handler:   jpfSortBy,
 			hasExpRef: true,
 		},
+		"split": {
+			name: "split",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+				{types: []jpType{jpString}},
+				{types: []jpType{jpNumber}, optional: true},
+			},
+			handler: jpfSplit,
+		},
 		"starts_with": {
 			name: "starts_with",
 			arguments: []argSpec{
@@ -1000,6 +1009,43 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 	} else {
 		return nil, errors.New("invalid type, must be number of string")
 	}
+}
+
+func jpfSplit(arguments []interface{}) (interface{}, error) {
+	s := arguments[0].(string)
+	if len(s) == 0 {
+		return []interface{}{}, nil
+	}
+
+	sep := arguments[1].(string)
+	n := 0
+	nSpecified := len(arguments) > 2
+	if nSpecified {
+		num, ok := toPositiveInteger(arguments[2])
+		if !ok {
+			return nil, notAPositiveInteger("split", "count")
+		}
+		n = num
+	}
+
+	if nSpecified && n == 0 {
+		result := []interface{}{s}
+		return result, nil
+	}
+
+	count := -1
+	if nSpecified {
+		count = n + 1
+	}
+	splits := strings.SplitN(s, sep, count)
+
+	// convert []string to []interface{} ☹️
+
+	result := []interface{}{}
+	for _, split := range splits {
+		result = append(result, split)
+	}
+	return result, nil
 }
 
 func jpfStartsWith(arguments []interface{}) (interface{}, error) {
