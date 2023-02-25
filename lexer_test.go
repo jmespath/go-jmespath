@@ -44,6 +44,7 @@ var lexingTests = []struct {
 	{"'a'", []token{{tStringLiteral, "a", 1, 1}}},
 	{`'foo\'bar'`, []token{{tStringLiteral, "foo'bar", 1, 7}}},
 	{"@", []token{{tCurrent, "@", 0, 1}}},
+	{"$", []token{{tRoot, "$", 0, 1}}},
 	{"&", []token{{tExpref, "&", 0, 1}}},
 	// Quoted identifier unicode escape sequences
 	{`"\u2713"`, []token{{tQuotedIdentifier, "✓", 0, 3}}},

@@ -16,10 +16,16 @@ type treeInterpreter struct {
 	scopes *scopes
 }
 
-func newInterpreter() *treeInterpreter {
+func newInterpreter(data interface{}) *treeInterpreter {
+	root := make(map[string]interface{})
+	root["$"] = data
+
 	interpreter := treeInterpreter{}
 	interpreter.scopes = newScopes()
+	interpreter.scopes.pushScope(root)
+
 	interpreter.fCall = newFunctionCaller(interpreter.scopes)
+
 	return &interpreter
 }
 
@@ -161,6 +167,11 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		return flattened, nil
 	case ASTIdentity, ASTCurrentNode:
 		return value, nil
+	case ASTRootNode:
+		if result, ok := intr.scopes.getValue("$"); ok {
+			return result, nil
+		}
+		return nil, nil
 	case ASTIndex:
 		if sliceType, ok := value.([]interface{}); ok {
 			index := node.value.(int)

@@ -77,6 +77,7 @@ const (
 	tJSONLiteral
 	tStringLiteral
 	tCurrent
+	tRoot
 	tExpref
 	tAnd
 	tNot
@@ -94,6 +95,7 @@ var basicTokens = map[rune]tokType{
 	'(': tLparen,
 	')': tRparen,
 	'@': tCurrent,
+	'$': tRoot,
 }
 
 // Bit mask for [a-zA-Z_] shifted down 64 bits to fit in a single uint64.

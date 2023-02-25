@@ -40,13 +40,13 @@ func MustCompile(expression string) *JMESPath {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp *JMESPath) Search(data interface{}) (interface{}, error) {
-	intr := newInterpreter()
+	intr := newInterpreter(data)
 	return intr.Execute(jp.ast, data)
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func Search(expression string, data interface{}) (interface{}, error) {
-	intr := newInterpreter()
+	intr := newInterpreter(data)
 	parser := NewParser()
 	ast, err := parser.Parse(expression)
 	if err != nil {
