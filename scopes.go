@@ -19,8 +19,8 @@ func (scopes *scopes) popScope() map[string]interface{} {
 	if len(scopes.stack) == 0 {
 		panic("unable to pop empty scopes stack")
 	}
-	result := scopes.stack[0]
-	scopes.stack = scopes.stack[1:]
+	result := scopes.stack[len(scopes.stack)-1]
+	scopes.stack = scopes.stack[:len(scopes.stack)-1]
 	return result
 }
 

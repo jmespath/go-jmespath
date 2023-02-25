@@ -37,11 +37,13 @@ func TestScopesNested(t *testing.T) {
 	value, found = scopes.getValue("qux")
 	assert.True(found)
 	assert.Equal("quux", value.(string))
-}
 
-//
-//     def test_Scope_nested(self):
-//         self._scopes.pushScope({'foo': 'bar'})
-//         self._scopes.pushScope({'foo': 'baz'})
-//         value = self._scopes.getValue('foo')
-//         self.assertEqual('baz', value)
+	scopes.popScope()
+	value, found = scopes.getValue("foo")
+	assert.True(found)
+	assert.Equal("bar", value.(string))
+
+	scopes.popScope()
+	value, found = scopes.getValue("foo")
+	assert.False(found)
+}
