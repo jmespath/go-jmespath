@@ -1,6 +1,7 @@
 package jmespath
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 )
@@ -150,6 +151,29 @@ func toArrayNum(data interface{}) ([]float64, bool) {
 				return nil, false
 			}
 			result[i] = item
+		}
+		return result, true
+	}
+	return nil, false
+}
+
+// ToArrayJSONNum converts an empty interface type to a slice of float64.
+// If any element in the array cannot be converted, then nil is returned
+// along with a second value of false.
+func toArrayJSONNum(data interface{}) ([]float64, bool) {
+	// Is there a better way to do this with reflect?
+	if d, ok := data.([]interface{}); ok {
+		result := make([]float64, len(d))
+		for i, el := range d {
+			item, ok := el.(json.Number)
+			if !ok {
+				return nil, false
+			}
+			v, err := item.Float64()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = v
 		}
 		return result, true
 	}
