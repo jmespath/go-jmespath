@@ -117,6 +117,47 @@ func (a *byExprFloat) Less(i, j int) bool {
 	return ith < jth
 }
 
+type byExprJSONNumber struct {
+	intr     *treeInterpreter
+	node     ASTNode
+	items    []interface{}
+	hasError bool
+}
+
+func (a *byExprJSONNumber) Len() int {
+	return len(a.items)
+}
+func (a *byExprJSONNumber) Swap(i, j int) {
+	a.items[i], a.items[j] = a.items[j], a.items[i]
+}
+func (a *byExprJSONNumber) Less(i, j int) bool {
+	first, err := a.intr.Execute(a.node, a.items[i])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	ith, ok := first.(json.Number)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	second, err := a.intr.Execute(a.node, a.items[j])
+	if err != nil {
+		a.hasError = true
+		// Return a dummy value.
+		return true
+	}
+	jth, ok := second.(json.Number)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	left, _ := ith.Float64()
+	righ, _ := jth.Float64()
+	return left < righ
+}
+
 type functionCaller struct {
 	functionTable map[string]functionEntry
 }
@@ -538,6 +579,27 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		return nil, err
 	}
 	switch t := start.(type) {
+	case json.Number:
+		bestVal, err := t.Float64()
+		if err != nil {
+			return nil, err
+		}
+		bestItem := arr[0]
+		for _, item := range arr[1:] {
+			result, err := intr.Execute(node, item)
+			if err != nil {
+				return nil, err
+			}
+			current, ok := result.(float64)
+			if !ok {
+				return nil, errors.New("invalid type, must be number")
+			}
+			if current > bestVal {
+				bestVal = current
+				bestItem = item
+			}
+		}
+		return bestItem, nil
 	case float64:
 		bestVal := t
 		bestItem := arr[0]
@@ -575,7 +637,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	default:
-		return nil, errors.New("invalid type, must be number of string")
+		return nil, fmt.Errorf("invalid type, must be number or string: %T", t)
 	}
 }
 func jpfSum(arguments []interface{}) (interface{}, error) {
@@ -633,7 +695,29 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t, ok := start.(float64); ok {
+	switch t := start.(type) {
+	case json.Number:
+		bestVal, err := t.Float64()
+		if err != nil {
+			return nil, err
+		}
+		bestItem := arr[0]
+		for _, item := range arr[1:] {
+			result, err := intr.Execute(node, item)
+			if err != nil {
+				return nil, err
+			}
+			current, ok := result.(float64)
+			if !ok {
+				return nil, errors.New("invalid type, must be number")
+			}
+			if current < bestVal {
+				bestVal = current
+				bestItem = item
+			}
+		}
+		return bestItem, nil
+	case float64:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -651,7 +735,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else if t, ok := start.(string); ok {
+	case string:
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
@@ -669,10 +753,13 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 		}
 		return bestItem, nil
-	} else {
-		return nil, errors.New("invalid type, must be number of string")
+	default:
+		return nil, fmt.Errorf("invalid type, must be number or string: %T", t)
 	}
+
+	// return nil, errors.New("invalid type, must be number or string")
 }
+
 func jpfType(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0]
 	if _, ok := arg.(float64); ok {
@@ -745,22 +832,30 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, ok := start.(float64); ok {
+	switch start.(type) {
+	case json.Number:
+		sortable := &byExprJSONNumber{intr, node, arr, false}
+		sort.Stable(sortable)
+		if sortable.hasError {
+			return nil, errors.New("error in sort_by comparison")
+		}
+		return arr, nil
+	case float64:
 		sortable := &byExprFloat{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
-	} else if _, ok := start.(string); ok {
+	case string:
 		sortable := &byExprString{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
-	} else {
-		return nil, errors.New("invalid type, must be number of string")
+	default:
+		return nil, fmt.Errorf("invalid type, must be number of string: %T", start)
 	}
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
