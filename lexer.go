@@ -28,11 +28,25 @@ type Lexer struct {
 	buf        bytes.Buffer // Internal buffer used for building up values.
 }
 
+const (
+	ErrSyntax          string = "syntax"
+	ErrInvalidArity    string = "invalid-arity"
+	ErrInvalidType     string = "invalid-type"
+	ErrInvalidValue    string = "invalid-value"
+	ErrUnknownFunction string = "unknown-function"
+)
+
 // SyntaxError is the main error used whenever a lexing or parsing error occurs.
 type SyntaxError struct {
+	typ        string // Error type as defined in the JMESpath specification
 	msg        string // Error message displayed to user
 	Expression string // Expression that generated a SyntaxError
 	Offset     int    // The location in the string where the error occurred
+}
+
+// Type returns the type of error, as defined in the JMESpath specification.
+func (e SyntaxError) Type() string {
+	return e.typ
 }
 
 func (e SyntaxError) Error() string {
@@ -208,7 +222,7 @@ loop:
 		} else if _, ok := whiteSpace[r]; ok {
 			// Ignore whitespace
 		} else {
-			return tokens, lexer.syntaxError(fmt.Sprintf("Unknown char: %s", strconv.QuoteRuneToASCII(r)))
+			return tokens, lexer.syntaxError(ErrSyntax, fmt.Sprintf("Unknown char: %s", strconv.QuoteRuneToASCII(r)))
 		}
 	}
 	tokens = append(tokens, token{tEOF, "", len(lexer.expression), 0})
@@ -233,6 +247,7 @@ func (lexer *Lexer) consumeUntil(end rune) (string, error) {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
 		return "", SyntaxError{
+			typ:        ErrSyntax,
 			msg:        "Unclosed delimiter: " + string(end),
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
@@ -274,6 +289,7 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 		// Then we hit an EOF so we never reached the closing
 		// delimiter.
 		return token{}, SyntaxError{
+			typ:        ErrSyntax,
 			msg:        "Unclosed delimiter: '",
 			Expression: lexer.expression,
 			Offset:     len(lexer.expression),
@@ -293,8 +309,9 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	}, nil
 }
 
-func (lexer *Lexer) syntaxError(msg string) SyntaxError {
+func (lexer *Lexer) syntaxError(typ string, msg string) SyntaxError {
 	return SyntaxError{
+		typ:        typ,
 		msg:        msg,
 		Expression: lexer.expression,
 		Offset:     lexer.currentPos - 1,

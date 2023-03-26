@@ -11,8 +11,8 @@ var parsingErrorTests = []struct {
 	expression string
 	msg        string
 }{
-	{"foo.", "Incopmlete expression"},
-	{"[foo", "Incopmlete expression"},
+	{"foo.", "Incomplete expression"},
+	{"[foo", "Incomplete expression"},
 	{"]", "Invalid"},
 	{")", "Invalid"},
 	{"}", "Invalid"},

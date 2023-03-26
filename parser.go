@@ -136,7 +136,7 @@ func (p *Parser) Parse(expression string) (ASTNode, error) {
 		return ASTNode{}, err
 	}
 	if p.current() != tEOF {
-		return ASTNode{}, p.syntaxError(fmt.Sprintf(
+		return ASTNode{}, p.syntaxError(ErrSyntax, fmt.Sprintf(
 			"Unexpected token at the end of the expression: %s", p.current()))
 	}
 	return parsed, nil
@@ -195,8 +195,8 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 			parts[index] = &parsedInt
 			p.advance()
 		} else {
-			return ASTNode{}, p.syntaxError(
-				"Expected tColon or tNumber" + ", received: " + p.current().String())
+			return ASTNode{}, p.syntaxError(ErrSyntax,
+				"Expected tColon or tNumber"+", received: "+p.current().String())
 		}
 		current = p.current()
 	}
@@ -214,7 +214,7 @@ func (p *Parser) match(tokenType tokType) error {
 		p.advance()
 		return nil
 	}
-	return p.syntaxError("Expected " + tokenType.String() + ", received: " + p.current().String())
+	return p.syntaxError(ErrSyntax, "Expected "+tokenType.String()+", received: "+p.current().String())
 }
 
 func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
@@ -311,7 +311,7 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 			children: []ASTNode{node, right},
 		}, nil
 	}
-	return ASTNode{}, p.syntaxError("Unexpected token: " + tokenType.String())
+	return ASTNode{}, p.syntaxError(ErrSyntax, "Unexpected token: "+tokenType.String())
 }
 
 func (p *Parser) nud(token token) (ASTNode, error) {
@@ -333,7 +333,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case tQuotedIdentifier:
 		node := ASTNode{nodeType: ASTField, value: token.value}
 		if p.current() == tLparen {
-			return ASTNode{}, p.syntaxErrorToken("Can't have quoted identifier as function name.", token)
+			return ASTNode{}, p.syntaxErrorToken(ErrSyntax, "Can't have quoted identifier as function name.", token)
 		}
 		return node, nil
 	case tStar:
@@ -407,10 +407,10 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		}
 		return expression, nil
 	case tEOF:
-		return ASTNode{}, p.syntaxErrorToken("Incomplete expression", token)
+		return ASTNode{}, p.syntaxErrorToken(ErrSyntax, "Incomplete expression", token)
 	}
 
-	return ASTNode{}, p.syntaxErrorToken("Invalid token: "+token.tokenType.String(), token)
+	return ASTNode{}, p.syntaxErrorToken(ErrSyntax, "Invalid token: "+token.tokenType.String(), token)
 }
 
 func (p *Parser) parseMultiSelectList() (ASTNode, error) {
@@ -445,7 +445,7 @@ func (p *Parser) parseMultiSelectHash() (ASTNode, error) {
 		keyToken := p.lookaheadToken(0)
 		if err := p.match(tUnquotedIdentifier); err != nil {
 			if err := p.match(tQuotedIdentifier); err != nil {
-				return ASTNode{}, p.syntaxError("Expected tQuotedIdentifier or tUnquotedIdentifier")
+				return ASTNode{}, p.syntaxError(ErrSyntax, "Expected tQuotedIdentifier or tUnquotedIdentifier")
 			}
 		}
 		keyName := keyToken.value
@@ -536,7 +536,7 @@ func (p *Parser) parseDotRHS(bindingPower int) (ASTNode, error) {
 		}
 		return p.parseMultiSelectHash()
 	}
-	return ASTNode{}, p.syntaxError("Expected identifier, lbracket, or lbrace")
+	return ASTNode{}, p.syntaxError(ErrSyntax, "Expected identifier, lbracket, or lbrace")
 }
 
 func (p *Parser) parseProjectionRHS(bindingPower int) (ASTNode, error) {
@@ -554,7 +554,7 @@ func (p *Parser) parseProjectionRHS(bindingPower int) (ASTNode, error) {
 		}
 		return p.parseDotRHS(bindingPower)
 	} else {
-		return ASTNode{}, p.syntaxError("Error")
+		return ASTNode{}, p.syntaxError(ErrSyntax, "Error")
 	}
 }
 
@@ -583,8 +583,9 @@ func tokensOneOf(elements []tokType, token tokType) bool {
 	return false
 }
 
-func (p *Parser) syntaxError(msg string) SyntaxError {
+func (p *Parser) syntaxError(typ string, msg string) SyntaxError {
 	return SyntaxError{
+		typ:        typ,
 		msg:        msg,
 		Expression: p.expression,
 		Offset:     p.lookaheadToken(0).position,
@@ -594,8 +595,9 @@ func (p *Parser) syntaxError(msg string) SyntaxError {
 // Create a SyntaxError based on the provided token.
 // This differs from syntaxError() which creates a SyntaxError
 // based on the current lookahead token.
-func (p *Parser) syntaxErrorToken(msg string, t token) SyntaxError {
+func (p *Parser) syntaxErrorToken(typ string, msg string, t token) SyntaxError {
 	return SyntaxError{
+		typ:        typ,
 		msg:        msg,
 		Expression: p.expression,
 		Offset:     t.position,

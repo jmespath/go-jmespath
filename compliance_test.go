@@ -98,6 +98,11 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 	// an error when we try to evaluate the expression.
 	_, err := Search(testcase.Expression, given)
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
+	if er, ok := err.(SyntaxError); !ok {
+		assert.Fail("unexpected error: %T, %v: %s", err, err, fmt.Sprintf("Expression: %s", testcase.Expression))
+	} else {
+		assert.Equal(testcase.Error, er.Type(), fmt.Sprintf("Expression: %s", testcase.Expression))
+	}
 }
 
 func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
