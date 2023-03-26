@@ -328,7 +328,10 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	}
 	if !e.arguments[len(e.arguments)-1].variadic {
 		if len(e.arguments) != len(arguments) {
-			return nil, errors.New("incorrect number of args")
+			return nil, SyntaxError{
+				typ: ErrInvalidArity,
+				msg: "incorrect number of args",
+			}
 		}
 		for i, spec := range e.arguments {
 			userArg := arguments[i]
@@ -340,7 +343,10 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 		return arguments, nil
 	}
 	if len(arguments) < len(e.arguments) {
-		return nil, errors.New("invalid arity")
+		return nil, SyntaxError{
+			typ: ErrInvalidArity,
+			msg: fmt.Sprintf("not enough arguments for function %s", e.name),
+		}
 	}
 	return arguments, nil
 }
@@ -380,13 +386,19 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 			}
 		}
 	}
-	return fmt.Errorf("Invalid type for: %v, expected: %#v", arg, a.types)
+	return SyntaxError{
+		typ: ErrInvalidType,
+		msg: fmt.Sprintf("Invalid type for: %v, expected: %#v", arg, a.types),
+	}
 }
 
 func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr *treeInterpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
-		return nil, errors.New("unknown function: " + name)
+		return nil, SyntaxError{
+			typ: ErrUnknownFunction,
+			msg: "unknown function: " + name,
+		}
 	}
 	resolvedArgs, err := entry.resolveArgs(arguments)
 	if err != nil {
@@ -548,7 +560,10 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("invalid type, must be number")
+				return nil, SyntaxError{
+					typ: ErrInvalidType,
+					msg: "invalid type, must be number",
+				}
 			}
 			if current > bestVal {
 				bestVal = current
@@ -566,7 +581,10 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("invalid type, must be string")
+				return nil, SyntaxError{
+					typ: ErrInvalidType,
+					msg: "invalid type, must be string",
+				}
 			}
 			if current > bestVal {
 				bestVal = current
@@ -575,7 +593,10 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	default:
-		return nil, errors.New("invalid type, must be number of string")
+		return nil, SyntaxError{
+			typ: ErrInvalidType,
+			msg: "invalid type, must be number of string",
+		}
 	}
 }
 func jpfSum(arguments []interface{}) (interface{}, error) {
@@ -643,7 +664,10 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(float64)
 			if !ok {
-				return nil, errors.New("invalid type, must be number")
+				return nil, SyntaxError{
+					typ: ErrInvalidType,
+					msg: "invalid type, must be number",
+				}
 			}
 			if current < bestVal {
 				bestVal = current
@@ -661,7 +685,10 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 			}
 			current, ok := result.(string)
 			if !ok {
-				return nil, errors.New("invalid type, must be string")
+				return nil, SyntaxError{
+					typ: ErrInvalidType,
+					msg: "invalid type, must be string",
+				}
 			}
 			if current < bestVal {
 				bestVal = current
@@ -670,7 +697,10 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		}
 		return bestItem, nil
 	} else {
-		return nil, errors.New("invalid type, must be number of string")
+		return nil, SyntaxError{
+			typ: ErrInvalidType,
+			msg: "invalid type, must be number of string",
+		}
 	}
 }
 func jpfType(arguments []interface{}) (interface{}, error) {
@@ -749,18 +779,27 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 		sortable := &byExprFloat{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("error in sort_by comparison")
+			return nil, SyntaxError{
+				typ: ErrInvalidType,
+				msg: "error in sort_by comparison",
+			}
 		}
 		return arr, nil
 	} else if _, ok := start.(string); ok {
 		sortable := &byExprString{intr, node, arr, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
-			return nil, errors.New("error in sort_by comparison")
+			return nil, SyntaxError{
+				typ: ErrInvalidType,
+				msg: "error in sort_by comparison",
+			}
 		}
 		return arr, nil
 	} else {
-		return nil, errors.New("invalid type, must be number of string")
+		return nil, SyntaxError{
+			typ: ErrInvalidType,
+			msg: "invalid type, must be number of string",
+		}
 	}
 }
 func jpfJoin(arguments []interface{}) (interface{}, error) {
