@@ -15,7 +15,7 @@ func NewExpressionEvaluator(intrArg interface{}, expArg interface{}) ExpressionE
 	}
 }
 
-func (jp *JMESPath) RegisterFunction(name string, handler func([]interface{}) (interface{}, error), args string, variadic bool) error {
+func (jp *JMESPath) RegisterFunction(name string, args string, variadic bool, handler func([]interface{}) (interface{}, error)) error {
 	hasExpRef := false
 	var arguments []argSpec
 	for _, arg := range strings.Split(args, ",") {

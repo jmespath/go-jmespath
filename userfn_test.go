@@ -12,7 +12,7 @@ func TestUserDefinedFunctions(t *testing.T) {
 		return
 	}
 
-	err = searcher.RegisterFunction("icontains", func(args []interface{}) (interface{}, error) {
+	err = searcher.RegisterFunction("icontains", "string|array[string],string", false, func(args []interface{}) (interface{}, error) {
 		needle := strings.ToLower(args[1].(string))
 		if haystack, ok := args[0].(string); ok {
 			return strings.Contains(strings.ToLower(haystack), needle), nil
@@ -24,7 +24,7 @@ func TestUserDefinedFunctions(t *testing.T) {
 			}
 		}
 		return false, nil
-	}, "string|array[string],string", false)
+	})
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -46,7 +46,7 @@ func TestExpressionEvaluator(t *testing.T) {
 		return
 	}
 
-	err = searcher.RegisterFunction("my_map", func(args []interface{}) (interface{}, error) {
+	err = searcher.RegisterFunction("my_map", "expref,array", false, func(args []interface{}) (interface{}, error) {
 		evaluator := NewExpressionEvaluator(args[0], args[1])
 		arr := args[2].([]interface{})
 		mapped := make([]interface{}, 0, len(arr))
@@ -58,7 +58,7 @@ func TestExpressionEvaluator(t *testing.T) {
 			mapped = append(mapped, current)
 		}
 		return mapped, nil
-	}, "expref,array", false)
+	})
 
 	if !assert.NoError(t, err) {
 		return

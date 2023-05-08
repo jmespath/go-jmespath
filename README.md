@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/jmespath/go-jmespath.svg)](https://travis-ci.org/jmespath/go-jmespath)
 
-
+NOTE: This is a fork of [go-jmespath](https://github.com/jmespath/go-jmespath) with support for user-defined functions
 
 go-jmespath is a GO implementation of JMESPath,
 which is a query language for JSON.  It will take a JSON
@@ -70,6 +70,31 @@ you are going to run multiple searches with it:
     > result, err := precompiled.Search(data)
 	result = "bar"
 ```
+
+## User-defined Functions
+
+User-defined functions are added to precompiled queries as follows:
+
+```go
+precompiled, err := Compile("icontains(@, 'Bar')")
+err = precompiled.RegisterFunction("icontains", "string|array[string],string", false, func(args []interface{}) (interface{}, error) {
+    needle := strings.ToLower(args[1].(string))
+    if haystack, ok := args[0].(string); ok {
+        return strings.Contains(strings.ToLower(haystack), needle), nil
+    }
+    array, _ := toArrayStr(args[0])
+    for _, el := range array {
+        if strings.ToLower(el) == needle {
+            return true, nil
+        }
+    }
+    return false, nil
+})
+result, err = searcher.Search([]interface{}{"foo", "BAR", "baz"})
+```
+
+Support for JMESPath expression arguments (as used by `map()`, for example) is provided through the `NewExpressionEvaluator()` function.
+See the [test cases](userfn_test.go) for an example.
 
 ## More Resources
 
