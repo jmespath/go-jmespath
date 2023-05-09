@@ -361,7 +361,7 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 				return nil
 			}
 		case jpObject:
-			if _, ok := arg.(map[string]interface{}); ok {
+			if isObject(arg) {
 				return nil
 			}
 		case jpArrayNumber:
@@ -412,7 +412,7 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 	} else if isSliceType(arg) {
 		v := reflect.ValueOf(arg)
 		return float64(v.Len()), nil
-	} else if c, ok := arg.(map[string]interface{}); ok {
+	} else if c := toObject(arg); c != nil {
 		return float64(len(c)), nil
 	}
 	return nil, errors.New("could not compute length()")
@@ -516,7 +516,7 @@ func jpfMax(arguments []interface{}) (interface{}, error) {
 func jpfMerge(arguments []interface{}) (interface{}, error) {
 	final := make(map[string]interface{})
 	for _, m := range arguments {
-		mapped := m.(map[string]interface{})
+		mapped := toObject(m)
 		for key, value := range mapped {
 			final[key] = value
 		}
@@ -696,7 +696,7 @@ func jpfType(arguments []interface{}) (interface{}, error) {
 	return nil, errors.New("unknown type")
 }
 func jpfKeys(arguments []interface{}) (interface{}, error) {
-	arg := arguments[0].(map[string]interface{})
+	arg := toObject(arguments[0])
 	collected := make([]interface{}, 0, len(arg))
 	for key := range arg {
 		collected = append(collected, key)
@@ -704,7 +704,7 @@ func jpfKeys(arguments []interface{}) (interface{}, error) {
 	return collected, nil
 }
 func jpfValues(arguments []interface{}) (interface{}, error) {
-	arg := arguments[0].(map[string]interface{})
+	arg := toObject(arguments[0])
 	collected := make([]interface{}, 0, len(arg))
 	for _, value := range arg {
 		collected = append(collected, value)
