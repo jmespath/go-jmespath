@@ -50,19 +50,34 @@ func toObject(value interface{}) map[string]interface{} {
 		for i := 0; i < rt.NumField(); i++ {
 			f := rt.Field(i)
 			if f.IsExported() {
-				var key string
-				switch t := f.Tag.Get("json"); t {
-				case "", "-":
-					key = f.Name
-				default:
-					if i := strings.IndexByte(t, ','); i >= 0 {
-						if i == 0 {
-							key = f.Name
-						} else {
-							key = t[:i]
-						}
-					} else {
+				key := f.Name
+				if t, ok := f.Tag.Lookup("jmes"); ok {
+					switch t {
+					case "":
+						// Leave the key set to the field name
+						break
+					case "-":
+						// Skip this field
+						continue
+					default:
+						// Set the key to the tag value
 						key = t
+					}
+				} else if t, ok := f.Tag.Lookup("json"); ok {
+					switch t {
+					case "", "-":
+						// Leave the key set to the field name
+						break
+					default:
+						if i := strings.IndexByte(t, ','); i >= 0 {
+							if i != 0 {
+								// Set the key to the tag value up to the comma
+								key = t[:i]
+							} // else leave the key set to the field name
+						} else {
+							// Set the key to the tag value
+							key = t
+						}
 					}
 				}
 				ret[key] = rv.Field(i).Interface()
