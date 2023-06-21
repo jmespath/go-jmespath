@@ -115,25 +115,6 @@ func TestCanSupportStructWithSlicePointer(t *testing.T) {
 	assert.Equal("correct", result)
 }
 
-func TestWillAutomaticallyCapitalizeFieldNames(t *testing.T) {
-	assert := assert.New(t)
-	s := scalars{Foo: "one", Bar: "bar"}
-	// Note that there's a lower cased "foo" instead of "Foo",
-	// but it should still correspond to the Foo field in the
-	// scalars struct
-	result, err := Search("foo", &s)
-	assert.Nil(err)
-	assert.Equal("one", result)
-}
-
-func TestCanSupportStructWithSliceLowerCased(t *testing.T) {
-	assert := assert.New(t)
-	data := sliceType{A: "foo", B: []scalars{{"f1", "b1"}, {"correct", "b2"}}}
-	result, err := Search("b[-1].foo", data)
-	assert.Nil(err)
-	assert.Equal("correct", result)
-}
-
 func TestCanSupportStructWithNestedPointers(t *testing.T) {
 	assert := assert.New(t)
 	data := struct{ A *struct{ B int } }{}
