@@ -289,8 +289,8 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, nil
 		}
-		mapType, ok := left.(map[string]interface{})
-		if !ok {
+		mapType := toObject(left)
+		if mapType == nil {
 			return nil, nil
 		}
 		values := make([]interface{}, len(mapType))
