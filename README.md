@@ -16,7 +16,7 @@ you use, `jmespath.search`:
 
 
 ```go
-> import "github.com/jmespath/go-jmespath"
+> import "github.com/kyverno/go-jmespath"
 >
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
 > var data interface{}

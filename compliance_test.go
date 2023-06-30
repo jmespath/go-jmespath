@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
 )
 
 type TestSuite struct {

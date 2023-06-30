@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
 )
 
 var lexingTests = []struct {

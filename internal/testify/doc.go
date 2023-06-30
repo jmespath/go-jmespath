@@ -14,9 +14,9 @@ package testify
 // blank imports help docs.
 import (
 	// assert package
-	_ "github.com/jmespath/go-jmespath/internal/testify/assert"
+	_ "github.com/kyverno/go-jmespath/internal/testify/assert"
 	// http package
-	_ "github.com/jmespath/go-jmespath/internal/testify/http"
+	_ "github.com/kyverno/go-jmespath/internal/testify/http"
 	// mock package
-	_ "github.com/jmespath/go-jmespath/internal/testify/mock"
+	_ "github.com/kyverno/go-jmespath/internal/testify/mock"
 )

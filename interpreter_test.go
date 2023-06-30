@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
 )
 
 type scalars struct {

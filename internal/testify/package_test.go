@@ -3,7 +3,7 @@ package testify
 import (
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
 )
 
 func TestImports(t *testing.T) {

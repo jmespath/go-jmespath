@@ -1,8 +1,9 @@
 package http
 
 import (
-	"github.com/jmespath/go-jmespath/internal/testify/mock"
 	"net/http"
+
+	"github.com/kyverno/go-jmespath/internal/testify/mock"
 )
 
 // TestRoundTripper DEPRECATED USE net/http/httptest

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
-	"github.com/jmespath/go-jmespath/internal/testify/require"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/require"
 )
 
 // SuiteRequireTwice is intended to test the usage of suite.Require in two

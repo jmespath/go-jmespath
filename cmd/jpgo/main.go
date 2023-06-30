@@ -1,18 +1,18 @@
-/*Basic command line interface for debug and testing purposes.
+/*
+Basic command line interface for debug and testing purposes.
 
 Examples:
 
 Only print the AST for the expression:
 
-    jp.go -ast "foo.bar.baz"
+	jp.go -ast "foo.bar.baz"
 
 Evaluate the JMESPath expression against JSON data from a file:
 
-    jp.go -input /tmp/data.json "foo.bar.baz"
+	jp.go -input /tmp/data.json "foo.bar.baz"
 
 This program can also be used as an executable to the jp-compliance
 runner (github.com/jmespath/jmespath.test).
-
 */
 package main
 
@@ -26,7 +26,7 @@ import (
 import (
 	"encoding/json"
 
-	"github.com/jmespath/go-jmespath"
+	"github.com/kyverno/go-jmespath"
 )
 
 func errMsg(msg string, a ...interface{}) int {

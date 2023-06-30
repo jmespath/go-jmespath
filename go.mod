@@ -1,5 +1,5 @@
-module github.com/jmespath/go-jmespath
+module github.com/kyverno/go-jmespath
 
 go 1.14
 
-require github.com/jmespath/go-jmespath/internal/testify v1.5.1
+require github.com/kyverno/go-jmespath/internal/testify module

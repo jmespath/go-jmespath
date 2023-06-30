@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
-	"github.com/jmespath/go-jmespath/internal/testify/require"
+	"github.com/kyverno/go-jmespath/internal/testify/assert"
+	"github.com/kyverno/go-jmespath/internal/testify/require"
 )
 
 var allTestsFilter = func(_, _ string) (bool, error) { return true, nil }
