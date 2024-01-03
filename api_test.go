@@ -42,3 +42,14 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	}()
 	MustCompile("not a valid expression")
 }
+
+func TestFunctionToObject(t *testing.T) {
+	assert := assert.New(t)
+	var j = []byte(`{"name":"John","test":{"js":"{\"age\": 26, \"city\": \"BeiJin\"}"},"nested_json":"{\"age\": 25, \"city\": \"NewYork\"}"}`)
+	var d interface{}
+	err := json.Unmarshal(j, &d)
+	assert.Nil(err)
+	result, err := Search("[name,to_object(test.js).city,to_object(nested_json).city]", d)
+	assert.Nil(err)
+	assert.Equal([]interface{}{"John", "BeiJin", "NewYork"}, result)
+}
