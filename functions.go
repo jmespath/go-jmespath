@@ -318,6 +318,13 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfNotNull,
 		},
+		"to_object": {
+			name: "to_object",
+			arguments: []argSpec{
+				{types: []jpType{jpString}},
+			},
+			handler: jpfToObject,
+		},
 	}
 	return caller
 }
@@ -838,4 +845,14 @@ func jpfNotNull(arguments []interface{}) (interface{}, error) {
 		}
 	}
 	return nil, nil
+}
+
+func jpfToObject(arguments []interface{}) (interface{}, error) {
+	v := arguments[0].(string)
+	var obj interface{}
+	err := json.Unmarshal([]byte(v), &obj)
+	if err != nil {
+		return nil, errors.New("invalid json string")
+	}
+	return obj, nil
 }
