@@ -793,6 +793,13 @@ func jpfToArray(arguments []interface{}) (interface{}, error) {
 	if _, ok := arguments[0].([]interface{}); ok {
 		return arguments[0], nil
 	}
+	if asString, ok := arguments[0].(string); ok {
+		var unmarshalled interface{}
+		err := json.Unmarshal([]byte(asString), &unmarshalled)
+		if err == nil {
+			return []interface{}{unmarshalled}, err
+		}
+	}
 	return arguments[:1:1], nil
 }
 func jpfToString(arguments []interface{}) (interface{}, error) {
