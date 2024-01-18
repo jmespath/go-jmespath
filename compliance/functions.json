@@ -468,6 +468,10 @@
       "result": [{"foo": "bar", "bar": "baz"}]
     },
     {
+      "expression": "to_array(to_string(objects))",
+      "result": [{"foo": "bar", "bar": "baz"}]
+    },
+    {
       "expression": "to_array(`[1, 2, 3]`)",
       "result": [1, 2, 3]
     },
