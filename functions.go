@@ -259,6 +259,13 @@ func newFunctionCaller() *functionCaller {
 			},
 			handler: jpfValues,
 		},
+		"to_entries": {
+			name: "to_entries",
+			arguments: []argSpec{
+				{types: []jpType{jpObject}},
+			},
+			handler: jpfToEntries,
+		},
 		"sort": {
 			name: "sort",
 			arguments: []argSpec{
@@ -708,6 +715,24 @@ func jpfValues(arguments []interface{}) (interface{}, error) {
 	collected := make([]interface{}, 0, len(arg))
 	for _, value := range arg {
 		collected = append(collected, value)
+	}
+	return collected, nil
+}
+func jpfToEntries(arguments []interface{}) (interface{}, error) {
+	arg := arguments[0].(map[string]interface{})
+	keys := make([]string, 0, len(arg))
+	for key := range arg {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	collected := make([]interface{}, 0, len(arg))
+	for _, key := range keys {
+		entry := map[string]interface{}{
+			"key":   key,
+			"value": arg[key],
+		}
+		collected = append(collected, entry)
 	}
 	return collected, nil
 }

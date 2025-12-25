@@ -42,3 +42,25 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	}()
 	MustCompile("not a valid expression")
 }
+
+func TestToEntries(t *testing.T) {
+	assert := assert.New(t)
+	data := make(map[string]interface{})
+	data["foo"] = "bar"
+	data["baz"] = 42
+	result, err := Search("to_entries(@)", data)
+	assert.Nil(err)
+
+	entries, ok := result.([]interface{})
+	assert.True(ok)
+	assert.Equal(2, len(entries))
+
+	for _, entry := range entries {
+		entryMap, ok := entry.(map[string]interface{})
+		assert.True(ok)
+		_, hasKey := entryMap["key"]
+		_, hasValue := entryMap["value"]
+		assert.True(hasKey)
+		assert.True(hasValue)
+	}
+}

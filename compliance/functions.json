@@ -356,6 +356,18 @@
       "error": "invalid-type"
     },
     {
+      "expression": "to_entries(objects)",
+      "result": [{"key": "bar", "value": "baz"}, {"key": "foo", "value": "bar"}]
+    },
+    {
+      "expression": "to_entries(empty_hash)",
+      "result": []
+    },
+    {
+      "expression": "to_entries(foo)",
+      "error": "invalid-type"
+    },
+    {
       "expression": "join(', ', strings)",
       "result": "a, b, c"
     },
