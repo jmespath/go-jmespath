@@ -181,6 +181,15 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 	assert.Equal(result.(float64), 2.0)
 }
 
+func TestValueProjectionDoesNotEmitExtraNulls(t *testing.T) {
+	assert := assert.New(t)
+	var data interface{}
+	assert.Nil(json.Unmarshal([]byte(`{"a": "x", "b": "y"}`), &data))
+	result, err := Search("*.to_string(@)", data)
+	assert.Nil(err)
+	assert.ElementsMatch([]interface{}{"x", "y"}, result)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
 	intr := newInterpreter()
