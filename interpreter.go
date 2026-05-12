@@ -295,7 +295,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if !ok {
 			return nil, nil
 		}
-		values := make([]interface{}, len(mapType))
+		values := make([]interface{}, 0, len(mapType))
 		for _, value := range mapType {
 			values = append(values, value)
 		}
