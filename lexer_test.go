@@ -96,6 +96,10 @@ var lexingErrorTests = []struct {
 }{
 	{"'foo", "Missing closing single quote"},
 	{"[?foo==bar?]", "Unknown char '?'"},
+	// U+0080 is the first rune outside the ASCII bit mask used for
+	// unquoted identifiers. It must be rejected rather than indexed.
+	{"a\u0080", "Unknown char '\\u0080'"},
+	{"a\u0080b", "Unknown char '\\u0080'"},
 }
 
 func TestLexingErrors(t *testing.T) {
