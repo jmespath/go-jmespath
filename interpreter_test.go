@@ -181,6 +181,40 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 	assert.Equal(result.(float64), 2.0)
 }
 
+func TestVariadicFunctionTypeChecking(t *testing.T) {
+	assert := assert.New(t)
+
+	// Issue #72: merge should return error instead of panicking when an argument is not an object.
+	data := map[string]interface{}{"message": "foo"}
+	result, err := Search("merge({message: message}, contextMap)", data)
+	assert.Nil(result)
+	assert.NotNil(err)
+
+	invalidExpressions := []string{
+		"merge(`\"foo\"`)",
+		"merge(`123`)",
+		"merge(`[1, 2]`)",
+		"merge(`true`)",
+		"merge(`{\"a\": 1}`, `\"b\"`)",
+		"merge(`{\"a\": 1}`, `null`)",
+	}
+	for _, expr := range invalidExpressions {
+		res, err := Search(expr, nil)
+		assert.Nil(res)
+		assert.NotNil(err)
+	}
+
+	// merge with valid objects should still succeed
+	res, err := Search("merge(`{\"a\": 1}`, `{\"b\": 2}`)", nil)
+	assert.Nil(err)
+	assert.Equal(map[string]interface{}{"a": float64(1), "b": float64(2)}, res)
+
+	// not_null with variadic arguments should still succeed
+	res, err = Search("not_null(foo, bar, `\"default\"`)", map[string]interface{}{})
+	assert.Nil(err)
+	assert.Equal("default", res)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
 	intr := newInterpreter()

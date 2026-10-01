@@ -342,6 +342,17 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	if len(arguments) < len(e.arguments) {
 		return nil, errors.New("invalid arity")
 	}
+	for i, userArg := range arguments {
+		var spec argSpec
+		if i < len(e.arguments)-1 {
+			spec = e.arguments[i]
+		} else {
+			spec = e.arguments[len(e.arguments)-1]
+		}
+		if err := spec.typeCheck(userArg); err != nil {
+			return nil, err
+		}
+	}
 	return arguments, nil
 }
 
