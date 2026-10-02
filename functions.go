@@ -428,6 +428,10 @@ func jpfAvg(arguments []interface{}) (interface{}, error) {
 	// We've already type checked the value so we can safely use
 	// type assertions.
 	args := arguments[0].([]interface{})
+	// An empty array is null. The zero sum divided by zero was NaN.
+	if len(args) == 0 {
+		return nil, nil
+	}
 	length := float64(len(args))
 	numerator := 0.0
 	for _, n := range args {

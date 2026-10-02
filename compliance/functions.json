@@ -64,6 +64,10 @@
       "result": 2.75
     },
     {
+      "expression": "avg(empty_list)",
+      "result": null
+    },
+    {
       "expression": "avg(array)",
       "error": "invalid-type"
     },
