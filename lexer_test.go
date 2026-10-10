@@ -2,6 +2,7 @@ package jmespath
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/jmespath/go-jmespath/internal/testify/assert"
@@ -104,6 +105,39 @@ func TestLexingErrors(t *testing.T) {
 	for _, tt := range lexingErrorTests {
 		_, err := lexer.tokenize(tt.expression)
 		assert.NotNil(err, fmt.Sprintf("Expected lexing error: %s", tt.msg))
+	}
+}
+
+func TestLexerRuneBoundary(t *testing.T) {
+	assert := assert.New(t)
+	lexer := NewLexer()
+
+	boundaryExpressions := []struct {
+		name       string
+		expression string
+	}{
+		{"rune 126 tilde", "foo~"},
+		{"rune 127 boundary DEL", "foo\x7f"},
+		{"rune 128 boundary", "foo\u0080"},
+		{"rune 128 standalone", "\u0080"},
+		{"rune 129 boundary", "foo\u0081"},
+		{"rune 255 boundary", "foo\u00ff"},
+		{"rune 256 boundary", "foo\u0100"},
+		{"unicode symbol boundary", "foo✓"},
+		{"multibyte unicode identifier trailing", "foo日"},
+		{"identifier followed by rune 128 and valid token", "foo\u0080bar"},
+	}
+
+	for _, tt := range boundaryExpressions {
+		assert.NotPanics(func() {
+			tokens, err := lexer.tokenize(tt.expression)
+			assert.NotNil(err, "Expected syntax error for: "+tt.name)
+			if strings.HasPrefix(tt.expression, "foo") {
+				assert.True(len(tokens) >= 1)
+				assert.Equal(tUnquotedIdentifier, tokens[0].tokenType)
+				assert.Equal("foo", tokens[0].value)
+			}
+		}, "Tokenizing should not panic for: "+tt.name)
 	}
 }
 
